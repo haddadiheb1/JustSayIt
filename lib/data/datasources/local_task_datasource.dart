@@ -21,11 +21,10 @@ class LocalTaskDataSourceImpl implements LocalTaskDataSource {
 
   @override
   Future<void> init() async {
-    if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(TaskModelAdapter());
-    }
+    // Hive is already initialized in main.dart
+    // Just verify the box is open
     if (!Hive.isBoxOpen(boxName)) {
-      await Hive.openBox<TaskModel>(boxName);
+      throw StateError('Hive box "$boxName" should be opened in main.dart');
     }
   }
 
@@ -53,8 +52,21 @@ class LocalTaskDataSourceImpl implements LocalTaskDataSource {
 
   @override
   Stream<List<TaskModel>> watchTasks() {
-    // A simple way to stream changes from Hive
-    // We listen to the box events and map them to the full list
-    return _box.watch().map((event) => _box.values.toList());
+    // Return a stream that emits the current list immediately,
+    // then emits whenever the box changes
+    return Stream.multi((controller) {
+      // Emit current list immediately
+      controller.add(_box.values.toList());
+
+      // Listen to box changes and emit updated list
+      final subscription = _box.watch().listen((event) {
+        controller.add(_box.values.toList());
+      });
+
+      // Clean up when stream is cancelled
+      controller.onCancel = () {
+        subscription.cancel();
+      };
+    });
   }
 }

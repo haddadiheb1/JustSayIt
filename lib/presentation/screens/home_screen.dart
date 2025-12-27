@@ -21,12 +21,14 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String _capturedText = ""; // Store the captured text locally
+
   @override
   void initState() {
     super.initState();
-    // Initialize services
-    Future.microtask(() {
-      ref.read(initializeAppProvider);
+    // Initialize services - must await the app initialization
+    Future.microtask(() async {
+      await ref.read(initializeAppProvider.future);
       ref.read(notificationServiceProvider).init();
       ref.read(speechServiceProvider).init();
     });
@@ -37,39 +39,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final notifier = ref.read(speechStateProvider.notifier);
     final isListeningNotifier = ref.read(listeningStateProvider.notifier);
 
+    // Reset captured text
+    _capturedText = "";
+
     // Show listening sheet
     showModalBottomSheet(
       context: context,
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => const VoiceCaptureSheet(),
+      builder: (_) => VoiceCaptureSheet(
+        onStop: () => _stopListening(),
+      ),
     );
 
     isListeningNotifier.setListening(true);
     notifier.update("");
 
+    debugPrint('Starting speech recognition...');
     await speechService.startListening(onResult: (text) {
-      notifier.update(text);
+      debugPrint('Speech result received: "$text"');
+      _capturedText = text; // Store in local variable
+      notifier.update(text); // Also update provider for UI
     });
-
-    // Wait for a silence/pause logic or manual stop
-    // For MVP, we'll rely on SpeechToText's auto stop or we can listen to status
-    // Here we'll simulate a check: if speech stops, we close the sheet and parse.
-    // Ideally we listen to "not listening" status.
-
-    // Quick polling for sake of MVP simplicity or better yet:
-    // SpeechToText usually stops automatically on platform.
-    _waitForSpeechEnd();
+    debugPrint('Speech recognition started');
   }
 
-  void _waitForSpeechEnd() async {
+  void _stopListening() async {
     final speechService = ref.read(speechServiceProvider);
 
-    // Wait until it stops listening
-    while (speechService.isListening) {
-      await Future.delayed(const Duration(milliseconds: 500));
-    }
+    // Stop the speech service
+    await speechService.stopListening();
+
+    // Give a small delay to ensure final result is captured
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (!mounted) return;
 
@@ -77,21 +80,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Navigator.of(context).pop();
     ref.read(listeningStateProvider.notifier).setListening(false);
 
-    final text = ref.read(speechStateProvider);
-    if (text.isNotEmpty) {
-      _processVoiceCommand(text);
+    debugPrint('Captured text from local variable: "$_capturedText"');
+
+    if (_capturedText.isNotEmpty) {
+      _processVoiceCommand(_capturedText);
+    } else {
+      debugPrint('No text captured from speech');
+      // Show a message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No speech detected. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   void _processVoiceCommand(String text) {
+    debugPrint('Processing voice command: "$text"');
     final result = DateTimeParser.parse(text);
+    debugPrint(
+        'Parser result - title: "${result.title}", dateTime: ${result.dateTime}');
+
     if (result.dateTime == null) {
-      // If logic failed, maybe just show it as a note or ask again?
-      // For MVP, we'll default to Today End of Day if null, or just let user pick in sheet.
-      // The parser handles some defaults, but let's be safe.
-      // Actually parser returns DateTime? so we handle it.
+      debugPrint('Warning: dateTime is null, using current time');
     }
 
+    debugPrint('Showing task confirmation sheet...');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

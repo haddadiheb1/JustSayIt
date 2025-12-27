@@ -21,22 +21,29 @@ class SpeechServiceImpl implements SpeechService {
 
   @override
   Future<bool> init() async {
+    debugPrint('Initializing speech service...');
     _isEnabled = await _speechToText.initialize(
-      onError: (val) => debugPrint('onError: $val'),
-      onStatus: (val) => debugPrint('onStatus: $val'),
+      onError: (val) => debugPrint('Speech error: $val'),
+      onStatus: (val) => debugPrint('Speech status: $val'),
     );
+    debugPrint('Speech service initialized: $_isEnabled');
     return _isEnabled;
   }
 
   @override
   Future<void> startListening({required Function(String) onResult}) async {
+    debugPrint('startListening called, _isEnabled: $_isEnabled');
     if (!_isEnabled) {
+      debugPrint('Speech not enabled, initializing...');
       await init();
     }
 
     if (_isEnabled) {
+      debugPrint('Starting to listen...');
       await _speechToText.listen(
         onResult: (result) {
+          debugPrint(
+              'onResult callback: ${result.recognizedWords}, isFinal: ${result.finalResult}');
           onResult(result.recognizedWords);
         },
         listenFor: const Duration(seconds: 30),
@@ -47,6 +54,9 @@ class SpeechServiceImpl implements SpeechService {
           listenMode: ListenMode.dictation,
         ),
       );
+      debugPrint('Listen started, isListening: ${_speechToText.isListening}');
+    } else {
+      debugPrint('Speech service not enabled after init!');
     }
   }
 
