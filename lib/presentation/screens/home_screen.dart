@@ -178,7 +178,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlue)),
                 ),
-                ...today.map((t) => TaskCard(task: t)),
+                ...today.asMap().entries.map(
+                    (entry) => TaskCard(task: entry.value, index: entry.key)),
               ],
               if (upcoming.isNotEmpty) ...[
                 const Padding(
@@ -188,14 +189,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryBlue)),
                 ),
-                ...upcoming.map((t) => TaskCard(task: t)),
+                ...upcoming.asMap().entries.map(
+                    (entry) => TaskCard(task: entry.value, index: entry.key)),
               ],
               if (completed.isNotEmpty) ...[
                 ExpansionTile(
                   title: const Text("Completed",
                       style: TextStyle(
                           fontWeight: FontWeight.bold, color: Colors.grey)),
-                  children: completed.map((t) => TaskCard(task: t)).toList(),
+                  children: completed
+                      .asMap()
+                      .entries
+                      .map((entry) =>
+                          TaskCard(task: entry.value, index: entry.key))
+                      .toList(),
                 ),
               ],
             ],
