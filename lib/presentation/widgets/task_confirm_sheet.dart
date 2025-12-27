@@ -1,0 +1,167 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import 'package:just_say_it/core/theme/app_theme.dart';
+import 'package:just_say_it/presentation/providers/task_provider.dart';
+
+class TaskConfirmSheet extends ConsumerStatefulWidget {
+  final String initialTitle;
+  final DateTime initialDate;
+
+  const TaskConfirmSheet({
+    super.key,
+    required this.initialTitle,
+    required this.initialDate,
+  });
+
+  @override
+  ConsumerState<TaskConfirmSheet> createState() => _TaskConfirmSheetState();
+}
+
+class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
+  late TextEditingController _titleController;
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _selectedDate = widget.initialDate;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      if (!mounted) return;
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      );
+      if (time != null) {
+        setState(() {
+          _selectedDate = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 24,
+        left: 24,
+        right: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "New Task",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppTheme.primaryBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const Gap(24),
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              hintText: "Task Title",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: AppTheme.secondaryGray,
+            ),
+            autofocus: true,
+          ),
+          const Gap(16),
+          InkWell(
+            onTap: _pickDate,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryGray,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, color: AppTheme.primaryBlue),
+                  const Gap(12),
+                  Text(
+                    DateFormat('EEE, MMM d • h:mm a').format(_selectedDate),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Gap(24),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => context.pop(),
+                  child: const Text("Cancel",
+                      style: TextStyle(color: Colors.grey)),
+                ),
+              ),
+              const Gap(16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_titleController.text.trim().isNotEmpty) {
+                      ref.read(addTaskProvider(
+                        title: _titleController.text.trim(),
+                        date: _selectedDate,
+                      ));
+                      context.pop();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text("Save Task"),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
