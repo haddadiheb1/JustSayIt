@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
 
@@ -130,7 +129,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text("Cancel",
                       style: TextStyle(color: Colors.grey)),
                 ),
@@ -138,13 +137,41 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
               const Gap(16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_titleController.text.trim().isNotEmpty) {
-                      ref.read(addTaskProvider(
+                      await ref.read(addTaskProvider(
                         title: _titleController.text.trim(),
                         date: _selectedDate,
-                      ));
-                      context.pop();
+                      ).future);
+
+                      if (!mounted) return;
+                      Navigator.of(context).pop();
+
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.check_circle,
+                                  color: Colors.white),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Task "${_titleController.text.trim()}" saved successfully!',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.green[600],
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          duration: const Duration(seconds: 3),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -30,6 +30,15 @@ class VoiceCaptureSheet extends ConsumerWidget {
               color: AppTheme.primaryBlue,
             ),
           ),
+          const Gap(8),
+          Text(
+            "Speak clearly and loudly",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
           const Gap(24),
           Text(
             liveText.isEmpty
