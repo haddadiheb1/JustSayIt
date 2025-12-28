@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -57,13 +58,23 @@ class NotificationServiceImpl implements NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    if (scheduledDate.isBefore(DateTime.now())) return;
+    if (scheduledDate.isBefore(DateTime.now())) {
+      debugPrint('⚠️ Scheduled date is in the past, skipping');
+      return;
+    }
+
+    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    debugPrint('🔔 Scheduling notification:');
+    debugPrint('   ID: $id');
+    debugPrint('   Title: $title');
+    debugPrint('   Scheduled for: $tzScheduledDate');
+    debugPrint('   Timezone: ${tz.local.name}');
 
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
+      tzScheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'task_channel',
@@ -93,20 +104,34 @@ class NotificationServiceImpl implements NotificationService {
     // Calculate reminder time (10 minutes before task)
     final reminderTime = taskDate.subtract(const Duration(minutes: 10));
 
+    debugPrint('📅 Scheduling reminder for task: $taskTitle');
+    debugPrint('   Task time: $taskDate');
+    debugPrint('   Reminder time: $reminderTime');
+    debugPrint('   Current time: ${DateTime.now()}');
+    debugPrint(
+        '   Time until reminder: ${reminderTime.difference(DateTime.now())}');
+
     // Skip if reminder time is in the past
     if (reminderTime.isBefore(DateTime.now())) {
+      debugPrint('⚠️ Reminder time is in the past, skipping notification');
       return;
     }
 
     // Convert task ID string to integer for notification ID
     final notificationId = taskId.hashCode.abs();
+    debugPrint('   Notification ID: $notificationId');
 
     // Schedule the reminder notification
-    await scheduleNotification(
-      id: notificationId,
-      title: '⏰ Task Reminder',
-      body: 'Your task "$taskTitle" starts in 10 minutes!',
-      scheduledDate: reminderTime,
-    );
+    try {
+      await scheduleNotification(
+        id: notificationId,
+        title: '⏰ Task Reminder',
+        body: 'Your task "$taskTitle" starts in 10 minutes!',
+        scheduledDate: reminderTime,
+      );
+      debugPrint('✅ Notification scheduled successfully!');
+    } catch (e) {
+      debugPrint('❌ Error scheduling notification: $e');
+    }
   }
 }
