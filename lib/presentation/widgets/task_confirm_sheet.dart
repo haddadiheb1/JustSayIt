@@ -159,23 +159,17 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
               const Gap(16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     if (_titleController.text.trim().isNotEmpty) {
-                      // Capture context-dependent objects before async gap
-                      final navigator = Navigator.of(context);
-                      final messenger = ScaffoldMessenger.of(context);
+                      // Capture values before closing
                       final taskTitle = _titleController.text.trim();
+                      final taskDate = _selectedDate;
 
-                      await ref.read(addTaskProvider(
-                        title: taskTitle,
-                        date: _selectedDate,
-                      ).future);
+                      // Close popup instantly
+                      Navigator.of(context).pop();
 
-                      if (!mounted) return;
-                      navigator.pop();
-
-                      // Show success message
-                      messenger.showSnackBar(
+                      // Show success message immediately
+                      ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Row(
                             children: [
@@ -199,6 +193,12 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                           margin: const EdgeInsets.all(16),
                         ),
                       );
+
+                      // Save task in background
+                      ref.read(addTaskProvider(
+                        title: taskTitle,
+                        date: taskDate,
+                      ));
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -248,7 +248,13 @@ class _TaskCardState extends ConsumerState<TaskCard>
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('Task "${widget.task.title}" deleted'),
+                  Expanded(
+                    child: Text(
+                      'Task "${widget.task.title}" deleted',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
               backgroundColor: Colors.red[600],
