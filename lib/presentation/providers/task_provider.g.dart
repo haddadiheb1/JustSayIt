@@ -6,7 +6,7 @@ part of 'task_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$addTaskHash() => r'ef2d046ac2ca6605866e265aca82c156acfd3969';
+String _$addTaskHash() => r'15d791034eab16db57fb1838ef62badd3381f0db';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -153,6 +153,8 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin AddTaskRef on AutoDisposeFutureProviderRef<void> {
   /// The parameter `title` of this provider.
   String get title;
@@ -171,7 +173,7 @@ class _AddTaskProviderElement extends AutoDisposeFutureProviderElement<void>
   DateTime get date => (origin as AddTaskProvider).date;
 }
 
-String _$deleteTaskHash() => r'fa1c88c64a326bccc25425950d02043da3e4e81b';
+String _$deleteTaskHash() => r'e0e396f5ef3a2d68d725537a388d4c9c021faa23';
 
 /// See also [deleteTask].
 @ProviderFor(deleteTask)
@@ -286,6 +288,8 @@ class DeleteTaskProvider extends AutoDisposeFutureProvider<void> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin DeleteTaskRef on AutoDisposeFutureProviderRef<void> {
   /// The parameter `id` of this provider.
   String get id;
@@ -299,7 +303,7 @@ class _DeleteTaskProviderElement extends AutoDisposeFutureProviderElement<void>
   String get id => (origin as DeleteTaskProvider).id;
 }
 
-String _$toggleTaskHash() => r'70e8e007c31362c8f46807ce2989d955459865fc';
+String _$toggleTaskHash() => r'ad3024554e14d49556ba99c750abcaae6ff0ecb6';
 
 /// See also [toggleTask].
 @ProviderFor(toggleTask)
@@ -414,6 +418,8 @@ class ToggleTaskProvider extends AutoDisposeFutureProvider<void> {
   }
 }
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 mixin ToggleTaskRef on AutoDisposeFutureProviderRef<void> {
   /// The parameter `task` of this provider.
   Task get task;
@@ -427,7 +433,137 @@ class _ToggleTaskProviderElement extends AutoDisposeFutureProviderElement<void>
   Task get task => (origin as ToggleTaskProvider).task;
 }
 
-String _$initializeAppHash() => r'ecc74bb483519fd3b69410575be413a2895033f1';
+String _$updateTaskHash() => r'a5b6d0da4bf884014e818b689c27618aaa1ee4f2';
+
+/// See also [updateTask].
+@ProviderFor(updateTask)
+const updateTaskProvider = UpdateTaskFamily();
+
+/// See also [updateTask].
+class UpdateTaskFamily extends Family<AsyncValue<void>> {
+  /// See also [updateTask].
+  const UpdateTaskFamily();
+
+  /// See also [updateTask].
+  UpdateTaskProvider call(
+    Task task,
+  ) {
+    return UpdateTaskProvider(
+      task,
+    );
+  }
+
+  @override
+  UpdateTaskProvider getProviderOverride(
+    covariant UpdateTaskProvider provider,
+  ) {
+    return call(
+      provider.task,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'updateTaskProvider';
+}
+
+/// See also [updateTask].
+class UpdateTaskProvider extends AutoDisposeFutureProvider<void> {
+  /// See also [updateTask].
+  UpdateTaskProvider(
+    Task task,
+  ) : this._internal(
+          (ref) => updateTask(
+            ref as UpdateTaskRef,
+            task,
+          ),
+          from: updateTaskProvider,
+          name: r'updateTaskProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$updateTaskHash,
+          dependencies: UpdateTaskFamily._dependencies,
+          allTransitiveDependencies:
+              UpdateTaskFamily._allTransitiveDependencies,
+          task: task,
+        );
+
+  UpdateTaskProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.task,
+  }) : super.internal();
+
+  final Task task;
+
+  @override
+  Override overrideWith(
+    FutureOr<void> Function(UpdateTaskRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: UpdateTaskProvider._internal(
+        (ref) => create(ref as UpdateTaskRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        task: task,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<void> createElement() {
+    return _UpdateTaskProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is UpdateTaskProvider && other.task == task;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, task.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin UpdateTaskRef on AutoDisposeFutureProviderRef<void> {
+  /// The parameter `task` of this provider.
+  Task get task;
+}
+
+class _UpdateTaskProviderElement extends AutoDisposeFutureProviderElement<void>
+    with UpdateTaskRef {
+  _UpdateTaskProviderElement(super.provider);
+
+  @override
+  Task get task => (origin as UpdateTaskProvider).task;
+}
+
+String _$initializeAppHash() => r'5224b3d1f9e05d0b8b9e389180ac478c9b545eef';
 
 /// See also [initializeApp].
 @ProviderFor(initializeApp)
@@ -441,6 +577,8 @@ final initializeAppProvider = AutoDisposeFutureProvider<void>.internal(
   allTransitiveDependencies: null,
 );
 
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
 typedef InitializeAppRef = AutoDisposeFutureProviderRef<void>;
 String _$taskListHash() => r'b7c43add9313d94e18ea57f8538763a2e0160ae7';
 
@@ -458,4 +596,4 @@ final taskListProvider =
 
 typedef _$TaskList = AutoDisposeStreamNotifier<List<Task>>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

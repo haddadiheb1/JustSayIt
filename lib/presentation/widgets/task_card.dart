@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/domain/entities/task.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
+import 'package:just_say_it/presentation/widgets/task_actions_sheet.dart';
+import 'package:just_say_it/presentation/widgets/task_edit_dialog.dart';
 
 class TaskCard extends ConsumerStatefulWidget {
   final Task task;
@@ -93,8 +95,8 @@ class _TaskCardState extends ConsumerState<TaskCard>
               boxShadow: [
                 BoxShadow(
                   color: widget.task.isCompleted
-                      ? Colors.grey.withOpacity(0.1)
-                      : AppTheme.primaryBlue.withOpacity(0.15),
+                      ? Colors.grey.withValues(alpha: 0.1)
+                      : AppTheme.primaryBlue.withValues(alpha: 0.15),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -105,6 +107,9 @@ class _TaskCardState extends ConsumerState<TaskCard>
               child: InkWell(
                 onTap: () {
                   ref.read(toggleTaskProvider(widget.task));
+                },
+                onLongPress: () {
+                  _showTaskActions(context);
                 },
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
@@ -225,6 +230,44 @@ class _TaskCardState extends ConsumerState<TaskCard>
           ),
         ),
       ),
+    );
+  }
+
+  void _showTaskActions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => TaskActionsSheet(
+        task: widget.task,
+        onEdit: () => _showEditDialog(context),
+        onDelete: () {
+          ref.read(deleteTaskProvider(widget.task.id));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('Task "${widget.task.title}" deleted'),
+                ],
+              ),
+              backgroundColor: Colors.red[600],
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => TaskEditDialog(task: widget.task),
     );
   }
 }

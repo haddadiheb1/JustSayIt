@@ -193,17 +193,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     (entry) => TaskCard(task: entry.value, index: entry.key)),
               ],
               if (completed.isNotEmpty) ...[
-                ExpansionTile(
-                  title: const Text("Completed",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey)),
-                  children: completed
-                      .asMap()
-                      .entries
-                      .map((entry) =>
-                          TaskCard(task: entry.value, index: entry.key))
-                      .toList(),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Colors.green[600],
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Completed (${completed.length})",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                ...completed.asMap().entries.map(
+                    (entry) => TaskCard(task: entry.value, index: entry.key)),
               ],
             ],
           );

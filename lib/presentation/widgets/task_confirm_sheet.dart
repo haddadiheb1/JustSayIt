@@ -87,7 +87,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                     const BorderRadius.vertical(top: Radius.circular(28)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, -5),
                   ),
@@ -161,16 +161,21 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_titleController.text.trim().isNotEmpty) {
+                      // Capture context-dependent objects before async gap
+                      final navigator = Navigator.of(context);
+                      final messenger = ScaffoldMessenger.of(context);
+                      final taskTitle = _titleController.text.trim();
+
                       await ref.read(addTaskProvider(
-                        title: _titleController.text.trim(),
+                        title: taskTitle,
                         date: _selectedDate,
                       ).future);
 
                       if (!mounted) return;
-                      Navigator.of(context).pop();
+                      navigator.pop();
 
                       // Show success message
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         SnackBar(
                           content: Row(
                             children: [
@@ -179,7 +184,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Task "${_titleController.text.trim()}" saved successfully!',
+                                  'Task "$taskTitle" saved successfully!',
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),

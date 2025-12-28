@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_say_it/domain/entities/task.dart';
 import 'package:just_say_it/data/repositories/task_repository_impl.dart';
 
@@ -19,7 +20,7 @@ class TaskList extends _$TaskList {
 
 @riverpod
 Future<void> addTask(
-  AddTaskRef ref, {
+  Ref ref, {
   required String title,
   required DateTime date,
 }) async {
@@ -28,20 +29,26 @@ Future<void> addTask(
 }
 
 @riverpod
-Future<void> deleteTask(DeleteTaskRef ref, String id) async {
+Future<void> deleteTask(Ref ref, String id) async {
   final repository = ref.read(taskRepositoryProvider);
   await repository.deleteTask(id);
 }
 
 @riverpod
-Future<void> toggleTask(ToggleTaskRef ref, Task task) async {
+Future<void> toggleTask(Ref ref, Task task) async {
   final repository = ref.read(taskRepositoryProvider);
   await repository.toggleTaskCompletion(task);
 }
 
+@riverpod
+Future<void> updateTask(Ref ref, Task task) async {
+  final repository = ref.read(taskRepositoryProvider);
+  await repository.updateTask(task);
+}
+
 // Separate provider to just ensure init is called
 @riverpod
-Future<void> initializeApp(InitializeAppRef ref) async {
+Future<void> initializeApp(Ref ref) async {
   final repository = ref.read(taskRepositoryProvider);
   await repository.init();
 }

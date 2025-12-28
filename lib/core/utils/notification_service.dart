@@ -15,6 +15,11 @@ abstract class NotificationService {
     required String body,
     required DateTime scheduledDate,
   });
+  Future<void> scheduleTaskReminder({
+    required String taskId,
+    required String taskTitle,
+    required DateTime taskDate,
+  });
   Future<void> cancelNotification(int id);
 }
 
@@ -77,5 +82,31 @@ class NotificationServiceImpl implements NotificationService {
   @override
   Future<void> cancelNotification(int id) async {
     await _notificationsPlugin.cancel(id);
+  }
+
+  @override
+  Future<void> scheduleTaskReminder({
+    required String taskId,
+    required String taskTitle,
+    required DateTime taskDate,
+  }) async {
+    // Calculate reminder time (10 minutes before task)
+    final reminderTime = taskDate.subtract(const Duration(minutes: 10));
+
+    // Skip if reminder time is in the past
+    if (reminderTime.isBefore(DateTime.now())) {
+      return;
+    }
+
+    // Convert task ID string to integer for notification ID
+    final notificationId = taskId.hashCode.abs();
+
+    // Schedule the reminder notification
+    await scheduleNotification(
+      id: notificationId,
+      title: '⏰ Task Reminder',
+      body: 'Your task "$taskTitle" starts in 10 minutes!',
+      scheduledDate: reminderTime,
+    );
   }
 }

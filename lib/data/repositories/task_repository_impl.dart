@@ -2,18 +2,21 @@ import 'package:just_say_it/data/datasources/local_task_datasource.dart';
 import 'package:just_say_it/data/models/task_model.dart';
 import 'package:just_say_it/domain/entities/task.dart';
 import 'package:just_say_it/domain/repositories/task_repository.dart';
+import 'package:just_say_it/core/utils/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
   final dataSource = ref.watch(localTaskDataSourceProvider);
-  return TaskRepositoryImpl(dataSource);
+  final notificationService = ref.watch(notificationServiceProvider);
+  return TaskRepositoryImpl(dataSource, notificationService);
 });
 
 class TaskRepositoryImpl implements TaskRepository {
   final LocalTaskDataSource _dataSource;
+  final NotificationService _notificationService;
 
-  TaskRepositoryImpl(this._dataSource);
+  TaskRepositoryImpl(this._dataSource, this._notificationService);
 
   @override
   Future<void> init() => _dataSource.init();
@@ -27,18 +30,29 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   Stream<List<Task>> watchTasks() {
     return _dataSource.watchTasks().map(
-      (models) => models.map(_mapToEntity).toList(),
-    );
+          (models) => models.map(_mapToEntity).toList(),
+        );
   }
 
   @override
   Future<void> addTask(String title, DateTime dateTime) async {
     final model = TaskModel.create(title: title, scheduledDate: dateTime);
     await _dataSource.addTask(model);
+
+    // Schedule reminder notification
+    await _notificationService.scheduleTaskReminder(
+      taskId: model.id,
+      taskTitle: model.title,
+      taskDate: model.scheduledDate,
+    );
   }
 
   @override
   Future<void> deleteTask(String id) async {
+    // Cancel reminder notification
+    final notificationId = id.hashCode.abs();
+    await _notificationService.cancelNotification(notificationId);
+
     await _dataSource.deleteTask(id);
   }
 
@@ -52,6 +66,12 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> toggleTaskCompletion(Task task) async {
     final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
     await updateTask(updatedTask);
+
+    // Cancel reminder if task is being completed
+    if (updatedTask.isCompleted) {
+      final notificationId = task.id.hashCode.abs();
+      await _notificationService.cancelNotification(notificationId);
+    }
   }
 
   Task _mapToEntity(TaskModel model) {
