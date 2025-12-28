@@ -10,13 +10,55 @@ class DateTimeParser {
     final lower = cleanText.toLowerCase();
 
     // Simple rule-based parsing
-    // "Tomorrow"
-    if (lower.contains('tomorrow')) {
+
+    // Context-aware time phrases (Natural Language Boost)
+    final contextualPhrases = {
+      // Time of day
+      'tonight': (daysToAdd: 0, hour: 20, minute: 0),
+      'this evening': (daysToAdd: 0, hour: 18, minute: 0),
+      'this afternoon': (daysToAdd: 0, hour: 14, minute: 0),
+      'this morning': (daysToAdd: 0, hour: 9, minute: 0),
+      'after lunch': (daysToAdd: 0, hour: 13, minute: 30),
+      'after dinner': (daysToAdd: 0, hour: 20, minute: 0),
+      'before lunch': (daysToAdd: 0, hour: 11, minute: 30),
+
+      // Tomorrow variants
+      'tomorrow morning': (daysToAdd: 1, hour: 9, minute: 0),
+      'tomorrow afternoon': (daysToAdd: 1, hour: 14, minute: 0),
+      'tomorrow evening': (daysToAdd: 1, hour: 18, minute: 0),
+      'tomorrow night': (daysToAdd: 1, hour: 20, minute: 0),
+    };
+
+    // Check for contextual phrases first
+    for (final entry in contextualPhrases.entries) {
+      if (lower.contains(entry.key)) {
+        final now = DateTime.now();
+        var dateTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          entry.value.hour,
+          entry.value.minute,
+        ).add(Duration(days: entry.value.daysToAdd));
+
+        // If time has passed today, move to tomorrow (for same-day phrases)
+        if (entry.value.daysToAdd == 0 && dateTime.isBefore(now)) {
+          dateTime = dateTime.add(const Duration(days: 1));
+        }
+
+        scheduledDate = dateTime;
+        cleanText = _removeKeyword(cleanText, entry.key);
+        break;
+      }
+    }
+
+    // "Tomorrow" (only if not already matched by contextual phrases)
+    if (scheduledDate == null && lower.contains('tomorrow')) {
       scheduledDate = _getDate(daysToAdd: 1);
       cleanText = _removeKeyword(cleanText, 'tomorrow');
     }
     // "Today"
-    else if (lower.contains('today')) {
+    else if (scheduledDate == null && lower.contains('today')) {
       scheduledDate = _getDate(daysToAdd: 0);
       cleanText = _removeKeyword(cleanText, 'today');
     }
