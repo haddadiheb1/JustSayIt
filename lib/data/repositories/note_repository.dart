@@ -28,15 +28,33 @@ class NoteRepositoryImpl implements NoteRepository {
     }
   }
 
+  Box<NoteModel> get _ensureBox {
+    if (_box == null || !_box!.isOpen) {
+      if (Hive.isBoxOpen(_boxName)) {
+        _box = Hive.box<NoteModel>(_boxName);
+      }
+    }
+    return _box!;
+  }
+
   @override
   List<NoteModel> getNotes() {
-    return _box?.values.toList() ?? [];
+    try {
+      return _ensureBox.values.toList();
+    } catch (e) {
+      return [];
+    }
   }
 
   @override
   Stream<List<NoteModel>> watchNotes() async* {
     yield getNotes();
-    yield* _box!.watch().map((_) => getNotes());
+    try {
+      yield* _ensureBox.watch().map((_) => getNotes());
+    } catch (e) {
+      // If box is not available, just yield empty list
+      yield [];
+    }
   }
 
   @override
