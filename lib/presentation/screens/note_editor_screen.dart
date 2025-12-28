@@ -77,12 +77,68 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     );
   }
 
+  void _deleteNote() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(deleteNoteProvider(widget.note!.id));
+              Navigator.pop(context);
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text('Note deleted'),
+                    ],
+                  ),
+                  backgroundColor: AppTheme.error,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  duration: const Duration(seconds: 2),
+                  margin: const EdgeInsets.all(16),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Note' : 'New Note'),
         actions: [
+          if (_isEditing)
+            IconButton(
+              onPressed: _deleteNote,
+              icon: const Icon(Icons.delete_outline),
+              color: AppTheme.error,
+              tooltip: 'Delete note',
+            ),
           TextButton.icon(
             onPressed: _saveNote,
             icon: const Icon(Icons.check),
@@ -129,7 +185,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Tip: First line becomes the title',
+              'Tip: ${_isEditing ? "Swipe left on a note to delete it quickly" : "First line becomes the title"}',
               style: TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
