@@ -58,6 +58,10 @@ class NotificationServiceImpl implements NotificationService {
   }) async {
     final now = DateTime.now();
 
+    debugPrint('📅 Scheduling reminders for: $taskTitle');
+    debugPrint('   Task time: $taskTime');
+    debugPrint('   Current time: $now');
+
     // Schedule notification 10 minutes BEFORE task time
     final beforeTime = taskTime.subtract(const Duration(minutes: 10));
     if (beforeTime.isAfter(now)) {
@@ -67,8 +71,9 @@ class NotificationServiceImpl implements NotificationService {
         body: '$taskTitle starts in 10 minutes',
         scheduledTime: beforeTime,
       );
-      debugPrint(
-          '📅 Scheduled reminder 10 min before: $taskTitle at $beforeTime');
+      debugPrint('✅ Scheduled "before" reminder at: $beforeTime');
+    } else {
+      debugPrint('⚠️ Skipped "before" reminder (time is in the past)');
     }
 
     // Schedule notification 10 minutes AFTER task time (overdue reminder)
@@ -80,8 +85,9 @@ class NotificationServiceImpl implements NotificationService {
         body: '$taskTitle is overdue. Check your tasks!',
         scheduledTime: afterTime,
       );
-      debugPrint(
-          '📅 Scheduled overdue reminder 10 min after: $taskTitle at $afterTime');
+      debugPrint('✅ Scheduled "after" reminder at: $afterTime');
+    } else {
+      debugPrint('⚠️ Skipped "after" reminder (time is in the past)');
     }
   }
 
@@ -91,27 +97,40 @@ class NotificationServiceImpl implements NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
-    final notificationId = id.hashCode.abs();
-    final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+    try {
+      final notificationId = id.hashCode.abs();
+      final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
 
-    await _notificationsPlugin.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      tzScheduledTime,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'task_reminders',
-          'Task Reminders',
-          channelDescription: 'Reminders for your tasks',
-          importance: Importance.high,
-          priority: Priority.high,
+      debugPrint('   Scheduling notification ID: $notificationId');
+      debugPrint('   TZ Scheduled time: $tzScheduledTime');
+      debugPrint(
+          '   Time until notification: ${tzScheduledTime.difference(tz.TZDateTime.now(tz.local))}');
+
+      await _notificationsPlugin.zonedSchedule(
+        notificationId,
+        title,
+        body,
+        tzScheduledTime,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'task_reminders',
+            'Task Reminders',
+            channelDescription: 'Reminders for your tasks',
+            importance: Importance.high,
+            priority: Priority.high,
+            enableVibration: true,
+            playSound: true,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      debugPrint('   ✅ Notification scheduled successfully');
+    } catch (e) {
+      debugPrint('   ❌ Error scheduling notification: $e');
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 
 part 'task.freezed.dart';
 
@@ -10,5 +11,6 @@ class Task with _$Task {
     required String title,
     required DateTime scheduledDate,
     @Default(false) bool isCompleted,
+    @Default(TaskCategory.defaultCategory) TaskCategory category,
   }) = _Task;
 }

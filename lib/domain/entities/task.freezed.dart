@@ -20,6 +20,7 @@ mixin _$Task {
   String get title => throw _privateConstructorUsedError;
   DateTime get scheduledDate => throw _privateConstructorUsedError;
   bool get isCompleted => throw _privateConstructorUsedError;
+  TaskCategory get category => throw _privateConstructorUsedError;
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -33,7 +34,11 @@ abstract class $TaskCopyWith<$Res> {
       _$TaskCopyWithImpl<$Res, Task>;
   @useResult
   $Res call(
-      {String id, String title, DateTime scheduledDate, bool isCompleted});
+      {String id,
+      String title,
+      DateTime scheduledDate,
+      bool isCompleted,
+      TaskCategory category});
 }
 
 /// @nodoc
@@ -55,6 +60,7 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
     Object? title = null,
     Object? scheduledDate = null,
     Object? isCompleted = null,
+    Object? category = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -73,6 +79,10 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
               as bool,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TaskCategory,
     ) as $Val);
   }
 }
@@ -85,7 +95,11 @@ abstract class _$$TaskImplCopyWith<$Res> implements $TaskCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String id, String title, DateTime scheduledDate, bool isCompleted});
+      {String id,
+      String title,
+      DateTime scheduledDate,
+      bool isCompleted,
+      TaskCategory category});
 }
 
 /// @nodoc
@@ -104,6 +118,7 @@ class __$$TaskImplCopyWithImpl<$Res>
     Object? title = null,
     Object? scheduledDate = null,
     Object? isCompleted = null,
+    Object? category = null,
   }) {
     return _then(_$TaskImpl(
       id: null == id
@@ -122,6 +137,10 @@ class __$$TaskImplCopyWithImpl<$Res>
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
               as bool,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as TaskCategory,
     ));
   }
 }
@@ -133,7 +152,8 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
       {required this.id,
       required this.title,
       required this.scheduledDate,
-      this.isCompleted = false});
+      this.isCompleted = false,
+      this.category = TaskCategory.defaultCategory});
 
   @override
   final String id;
@@ -144,10 +164,13 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
   @override
   @JsonKey()
   final bool isCompleted;
+  @override
+  @JsonKey()
+  final TaskCategory category;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Task(id: $id, title: $title, scheduledDate: $scheduledDate, isCompleted: $isCompleted)';
+    return 'Task(id: $id, title: $title, scheduledDate: $scheduledDate, isCompleted: $isCompleted, category: $category)';
   }
 
   @override
@@ -158,7 +181,8 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
       ..add(DiagnosticsProperty('id', id))
       ..add(DiagnosticsProperty('title', title))
       ..add(DiagnosticsProperty('scheduledDate', scheduledDate))
-      ..add(DiagnosticsProperty('isCompleted', isCompleted));
+      ..add(DiagnosticsProperty('isCompleted', isCompleted))
+      ..add(DiagnosticsProperty('category', category));
   }
 
   @override
@@ -171,12 +195,14 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
             (identical(other.scheduledDate, scheduledDate) ||
                 other.scheduledDate == scheduledDate) &&
             (identical(other.isCompleted, isCompleted) ||
-                other.isCompleted == isCompleted));
+                other.isCompleted == isCompleted) &&
+            (identical(other.category, category) ||
+                other.category == category));
   }
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, title, scheduledDate, isCompleted);
+      Object.hash(runtimeType, id, title, scheduledDate, isCompleted, category);
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -192,7 +218,8 @@ abstract class _Task implements Task {
       {required final String id,
       required final String title,
       required final DateTime scheduledDate,
-      final bool isCompleted}) = _$TaskImpl;
+      final bool isCompleted,
+      final TaskCategory category}) = _$TaskImpl;
 
   @override
   String get id;
@@ -202,6 +229,8 @@ abstract class _Task implements Task {
   DateTime get scheduledDate;
   @override
   bool get isCompleted;
+  @override
+  TaskCategory get category;
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.

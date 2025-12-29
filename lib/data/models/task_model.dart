@@ -1,30 +1,37 @@
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 
 class TaskModel extends HiveObject {
   final String id;
   final String title;
   final DateTime scheduledDate;
   final bool isCompleted;
+  final int categoryIndex; // Store as int for Hive
 
   TaskModel({
     required this.id,
     required this.title,
     required this.scheduledDate,
     this.isCompleted = false,
+    this.categoryIndex = 0, // Default category
   });
 
   factory TaskModel.create({
     required String title,
     required DateTime scheduledDate,
+    TaskCategory category = TaskCategory.defaultCategory,
   }) {
     return TaskModel(
       id: const Uuid().v4(),
       title: title,
       scheduledDate: scheduledDate,
       isCompleted: false,
+      categoryIndex: category.index,
     );
   }
+
+  TaskCategory get category => TaskCategory.values[categoryIndex];
 
   TaskModel copyWith({
     String? title,
@@ -36,6 +43,7 @@ class TaskModel extends HiveObject {
       title: title ?? this.title,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       isCompleted: isCompleted ?? this.isCompleted,
+      categoryIndex: this.categoryIndex,
     );
   }
 }
@@ -56,13 +64,14 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       title: fields[1] as String,
       scheduledDate: fields[2] as DateTime,
       isCompleted: fields[3] as bool,
+      categoryIndex: fields[4] as int? ?? 0, // Default to 0 if not present
     );
   }
 
   @override
   void write(BinaryWriter writer, TaskModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5) // Updated field count
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -70,7 +79,9 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(2)
       ..write(obj.scheduledDate)
       ..writeByte(3)
-      ..write(obj.isCompleted);
+      ..write(obj.isCompleted)
+      ..writeByte(4)
+      ..write(obj.categoryIndex);
   }
 
   @override
