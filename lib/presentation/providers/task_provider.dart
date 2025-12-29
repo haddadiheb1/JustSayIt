@@ -1,9 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/domain/entities/task.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
-import 'package:just_say_it/data/repositories/task_repository_impl.dart';
-import 'package:just_say_it/core/services/widget_sync_service.dart';
+import 'package:say_task/domain/entities/task.dart';
+import 'package:say_task/domain/entities/task_category.dart';
+import 'package:say_task/data/repositories/task_repository_impl.dart';
+import 'package:say_task/core/services/widget_sync_service.dart';
 
 part 'task_provider.g.dart';
 

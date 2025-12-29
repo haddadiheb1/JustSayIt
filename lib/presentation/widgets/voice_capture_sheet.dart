@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/presentation/providers/speech_provider.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/presentation/providers/speech_provider.dart';
 
 class VoiceCaptureSheet extends ConsumerWidget {
   final VoidCallback onStop;

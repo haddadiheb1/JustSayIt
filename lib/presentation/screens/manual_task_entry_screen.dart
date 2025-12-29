@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/core/utils/date_parser.dart';
-import 'package:just_say_it/presentation/widgets/task_confirm_sheet.dart';
+import 'package:say_task/core/utils/date_parser.dart';
+import 'package:say_task/presentation/widgets/task_confirm_sheet.dart';
 
 class ManualTaskEntryScreen extends ConsumerStatefulWidget {
   const ManualTaskEntryScreen({super.key});

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/presentation/screens/main_navigation_screen.dart';
-import 'package:just_say_it/presentation/providers/settings_provider.dart';
-import 'package:just_say_it/data/models/task_model.dart';
-import 'package:just_say_it/data/models/note_model.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/presentation/screens/main_navigation_screen.dart';
+import 'package:say_task/presentation/providers/settings_provider.dart';
+import 'package:say_task/data/models/task_model.dart';
+import 'package:say_task/data/models/note_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/data/models/note_model.dart';
-import 'package:just_say_it/data/repositories/note_repository.dart';
+import 'package:say_task/data/models/note_model.dart';
+import 'package:say_task/data/repositories/note_repository.dart';
 
 part 'note_provider.g.dart';
 

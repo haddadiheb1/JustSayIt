@@ -1,4 +1,4 @@
-import 'package:just_say_it/data/models/task_model.dart';
+import 'package:say_task/data/models/task_model.dart';
 
 enum TimelineSection {
   overdue,

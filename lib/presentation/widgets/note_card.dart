@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/data/models/note_model.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/data/models/note_model.dart';
 import 'package:intl/intl.dart';
 
 class NoteCard extends StatelessWidget {

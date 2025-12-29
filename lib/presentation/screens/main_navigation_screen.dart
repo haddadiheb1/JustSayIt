@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:just_say_it/presentation/screens/home_screen.dart';
-import 'package:just_say_it/presentation/screens/notes_screen.dart';
-import 'package:just_say_it/presentation/screens/settings_screen.dart';
+import 'package:say_task/presentation/screens/home_screen.dart';
+import 'package:say_task/presentation/screens/notes_screen.dart';
+import 'package:say_task/presentation/screens/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});

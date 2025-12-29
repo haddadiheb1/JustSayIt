@@ -1,5 +1,5 @@
-name: just_say_it
-description: "Just Say It - Voice-to-Task Flutter App"
+name: say_task
+description: "Voice To-Do & Smart Notes"
 publish_to: 'none'
 version: 1.0.0+1
 

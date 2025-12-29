@@ -1,5 +1,5 @@
-import 'package:just_say_it/domain/entities/task.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
+import 'package:say_task/domain/entities/task.dart';
+import 'package:say_task/domain/entities/task_category.dart';
 
 abstract class TaskRepository {
   Future<void> init();

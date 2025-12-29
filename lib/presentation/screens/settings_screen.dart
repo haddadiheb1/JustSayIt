@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/presentation/providers/settings_provider.dart';
-import 'package:just_say_it/presentation/providers/task_provider.dart';
-import 'package:just_say_it/data/repositories/note_repository.dart';
+import 'package:say_task/presentation/providers/settings_provider.dart';
+import 'package:say_task/presentation/providers/task_provider.dart';
+import 'package:say_task/data/repositories/note_repository.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {

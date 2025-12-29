@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:just_say_it/domain/entities/task.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
-import 'package:just_say_it/presentation/providers/task_provider.dart';
+import 'package:say_task/domain/entities/task.dart';
+import 'package:say_task/domain/entities/task_category.dart';
+import 'package:say_task/presentation/providers/task_provider.dart';
 
 class TaskEditDialog extends ConsumerStatefulWidget {
   final Task task;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/domain/entities/task.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/domain/entities/task.dart';
 
 class TaskActionsSheet extends ConsumerWidget {
   final Task task;

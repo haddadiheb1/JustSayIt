@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
+import 'package:say_task/core/theme/app_theme.dart';
 
 class MicButton extends StatelessWidget {
   final VoidCallback onPressed;

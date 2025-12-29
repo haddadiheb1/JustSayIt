@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
-import 'package:just_say_it/domain/entities/task_priority.dart';
+import 'package:say_task/domain/entities/task_category.dart';
+import 'package:say_task/domain/entities/task_priority.dart';
 
 part 'task.freezed.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/presentation/screens/note_editor_screen.dart';
-import 'package:just_say_it/presentation/providers/note_provider.dart';
-import 'package:just_say_it/presentation/widgets/note_card.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/presentation/screens/note_editor_screen.dart';
+import 'package:say_task/presentation/providers/note_provider.dart';
+import 'package:say_task/presentation/widgets/note_card.dart';
 
 class NotesScreen extends ConsumerWidget {
   const NotesScreen({super.key});

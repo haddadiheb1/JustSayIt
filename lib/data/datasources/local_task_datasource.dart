@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:just_say_it/data/models/task_model.dart';
+import 'package:say_task/data/models/task_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Provider for the datasource

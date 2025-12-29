@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:just_say_it/data/models/note_model.dart';
+import 'package:say_task/data/models/note_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final noteRepositoryProvider = Provider<NoteRepository>((ref) {

@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
-import 'package:just_say_it/domain/entities/task_priority.dart';
+import 'package:say_task/domain/entities/task_category.dart';
+import 'package:say_task/domain/entities/task_priority.dart';
 
 class TaskModel extends HiveObject {
   final String id;

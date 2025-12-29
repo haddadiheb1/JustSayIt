@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
-import 'package:just_say_it/presentation/providers/task_provider.dart';
-import 'package:just_say_it/domain/entities/task_category.dart';
+import 'package:say_task/core/theme/app_theme.dart';
+import 'package:say_task/presentation/providers/task_provider.dart';
+import 'package:say_task/domain/entities/task_category.dart';
 
 class TaskConfirmSheet extends ConsumerStatefulWidget {
   final String initialTitle;
