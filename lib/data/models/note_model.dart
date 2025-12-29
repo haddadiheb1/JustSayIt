@@ -18,16 +18,18 @@ class NoteModel extends HiveObject {
   });
 
   factory NoteModel.create(
-      {required String content, List<String> images = const []}) {
+      {required String content,
+      String title = '',
+      List<String> images = const []}) {
     final now = DateTime.now();
-    final lines = content.trim().split('\n');
-    final title = lines.first.isEmpty
-        ? (content.length > 50 ? '${content.substring(0, 50)}...' : content)
-        : lines.first;
+    // Use provided title or fallback to extracting from content
+    final finalTitle = title.isNotEmpty
+        ? title
+        : (content.trim().split('\n').firstOrNull ?? 'New Note');
 
     return NoteModel(
       id: now.millisecondsSinceEpoch.toString(),
-      title: title,
+      title: finalTitle,
       content: content,
       createdAt: now,
       updatedAt: now,

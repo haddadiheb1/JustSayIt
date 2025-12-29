@@ -19,6 +19,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   late final TextEditingController _contentController;
+  late final TextEditingController _titleController;
   final List<String> _selectedImages = [];
   bool _isEditing = false;
   final ImagePicker _picker = ImagePicker();
@@ -28,6 +29,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     super.initState();
     _contentController =
         TextEditingController(text: widget.note?.content ?? '');
+    _titleController = TextEditingController(text: widget.note?.title ?? '');
     _isEditing = widget.note != null;
     if (widget.note?.images != null) {
       _selectedImages.addAll(widget.note!.images);
@@ -37,6 +39,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   @override
   void dispose() {
     _contentController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -80,23 +83,20 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
 
     final String content = _contentController.text.trim();
+    final String title = _titleController.text.trim();
     final List<String> images = List.from(_selectedImages);
 
     if (_isEditing && widget.note != null) {
-      final lines = content.split('\n');
-      final title = lines.first.isEmpty
-          ? (content.length > 50 ? '${content.substring(0, 50)}...' : content)
-          : lines.first;
-
       final updatedNote = widget.note!.copyWith(
-        title: title.isEmpty ? 'Image Note' : title,
+        title: title.isEmpty ? 'Untitled Note' : title,
         content: content,
         images: images,
         updatedAt: DateTime.now(),
       );
       ref.read(updateNoteProvider(updatedNote));
     } else {
-      final note = NoteModel.create(content: content, images: images);
+      final note =
+          NoteModel.create(title: title, content: content, images: images);
       ref.read(addNoteProvider(note));
     }
 
@@ -158,23 +158,50 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Theme.of(context).dividerColor),
               ),
-              child: TextField(
-                controller: _contentController,
-                autofocus: !_isEditing,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: 'Start typing your note...',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
-                  hintStyle: TextStyle(
-                    color: AppTheme.textSecondary,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    enabled: true, // Only allow editing if proper
+                    decoration: const InputDecoration(
+                      hintText: 'Title',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      hintStyle: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.5,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                  Divider(
+                      color: Theme.of(context)
+                          .dividerColor
+                          .withValues(alpha: 0.2)),
+                  TextField(
+                    controller: _contentController,
+                    autofocus: !_isEditing,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      hintText: 'Start typing your note...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(16),
+                      hintStyle: TextStyle(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
             ),
             if (_selectedImages.isNotEmpty) ...[
@@ -230,7 +257,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             ],
             const SizedBox(height: 16),
             Text(
-              'Tip: ${_isEditing ? "Swipe left on a note to delete it quickly" : "First line becomes the title"}',
+              'Tip: ${_isEditing ? "Swipe left on a note to delete it quickly" : "Add a title to organize your notes better"}',
               style: TextStyle(
                 fontSize: 12,
                 color: AppTheme.textSecondary,
