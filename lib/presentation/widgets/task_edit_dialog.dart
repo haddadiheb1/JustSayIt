@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:just_say_it/domain/entities/task.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
 
 class TaskEditDialog extends ConsumerStatefulWidget {
@@ -16,12 +17,14 @@ class TaskEditDialog extends ConsumerStatefulWidget {
 class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
   late TextEditingController _titleController;
   late DateTime _selectedDate;
+  late TaskCategory _selectedCategory;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task.title);
     _selectedDate = widget.task.scheduledDate;
+    _selectedCategory = widget.task.category;
   }
 
   @override
@@ -73,174 +76,204 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
             child: Opacity(
               opacity: value,
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(28),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Header
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.edit,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.edit_rounded,
                             color: Theme.of(context).colorScheme.primary,
                             size: 24,
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            'Edit Task',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Edit Task',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Title field
-                    TextField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Task Title',
-                        hintText: 'Enter task title',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        filled: true,
-                        fillColor: Theme.of(context)
-                            .colorScheme
-                            .surface
-                            .withValues(alpha: 0.5),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surface
+                                  .withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
                       ),
-                      autofocus: true,
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
-                    // Date & Time picker
-                    InkWell(
-                      onTap: _pickDate,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
+                      // Title field
+                      TextField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          hintText: 'Task Title',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Theme.of(context)
                               .colorScheme
                               .surface
                               .withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(16),
-                          border:
-                              Border.all(color: Theme.of(context).dividerColor),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
+                        autofocus: true,
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Date & Time picker
+                      InkWell(
+                        onTap: _pickDate,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
                                 Icons.calendar_today,
                                 color: Theme.of(context).colorScheme.primary,
-                                size: 20,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Date & Time',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    DateFormat('EEE, MMM d • h:mm a')
-                                        .format(_selectedDate),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(width: 12),
+                              Text(
+                                DateFormat('EEE, MMM d • h:mm a')
+                                    .format(_selectedDate),
+                                style: const TextStyle(fontSize: 16),
                               ),
-                            ),
-                            Icon(Icons.chevron_right,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.4)),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
-                    // Action buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
+                      // Category Selector
+                      Text(
+                        'Category',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.7),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: TaskCategory.values.map((category) {
+                          final isSelected = _selectedCategory == category;
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _selectedCategory = category;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Color(category.colorValue)
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .surface
+                                        .withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Color(category.colorValue)
+                                      : Theme.of(context)
+                                          .dividerColor
+                                          .withValues(alpha: 0.3),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                category.displayName,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
                             ),
-                            child: const Text('Cancel'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: ElevatedButton(
-                            onPressed: _saveChanges,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Action buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
+                              child: const Text('Cancel'),
                             ),
-                            child: const Text('Save Changes'),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton(
+                              onPressed: _saveChanges,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('Save Changes'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -261,6 +294,7 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
     final updatedTask = widget.task.copyWith(
       title: _titleController.text.trim(),
       scheduledDate: _selectedDate,
+      category: _selectedCategory,
     );
 
     await ref.read(updateTaskProvider(updatedTask).future);

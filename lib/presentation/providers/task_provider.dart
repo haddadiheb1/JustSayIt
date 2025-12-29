@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_say_it/domain/entities/task.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 import 'package:just_say_it/data/repositories/task_repository_impl.dart';
 
 part 'task_provider.g.dart';
@@ -23,9 +24,10 @@ Future<void> addTask(
   Ref ref, {
   required String title,
   required DateTime date,
+  TaskCategory? category,
 }) async {
   final repository = ref.read(taskRepositoryProvider);
-  await repository.addTask(title, date);
+  await repository.addTask(title, date, category: category);
 }
 
 @riverpod

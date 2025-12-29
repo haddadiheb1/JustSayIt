@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 
 class TaskConfirmSheet extends ConsumerStatefulWidget {
   final String initialTitle;
@@ -22,6 +23,7 @@ class TaskConfirmSheet extends ConsumerStatefulWidget {
 class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
   late TextEditingController _titleController;
   late DateTime _selectedDate;
+  TaskCategory _selectedCategory = TaskCategory.defaultCategory;
 
   @override
   void initState() {
@@ -151,6 +153,66 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
               ),
             ),
           ),
+          const Gap(20),
+          // Category Selector
+          Text(
+            'Category',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.7),
+            ),
+          ),
+          const Gap(12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: TaskCategory.values.map((category) {
+              final isSelected = _selectedCategory == category;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Color(category.colorValue)
+                        : Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? Color(category.colorValue)
+                          : Theme.of(context)
+                              .dividerColor
+                              .withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Text(
+                    category.displayName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
           const Gap(24),
           Row(
             children: [
@@ -169,6 +231,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                       // Capture values before closing
                       final taskTitle = _titleController.text.trim();
                       final taskDate = _selectedDate;
+                      final taskCategory = _selectedCategory;
 
                       // Close popup instantly
                       Navigator.of(context).pop();
@@ -203,6 +266,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                       ref.read(addTaskProvider(
                         title: taskTitle,
                         date: taskDate,
+                        category: taskCategory,
                       ));
                     }
                   },

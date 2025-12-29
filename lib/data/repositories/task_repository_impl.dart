@@ -1,6 +1,7 @@
 import 'package:just_say_it/data/datasources/local_task_datasource.dart';
 import 'package:just_say_it/data/models/task_model.dart';
 import 'package:just_say_it/domain/entities/task.dart';
+import 'package:just_say_it/domain/entities/task_category.dart';
 import 'package:just_say_it/domain/repositories/task_repository.dart';
 import 'package:just_say_it/core/utils/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,8 +36,13 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<void> addTask(String title, DateTime dateTime) async {
-    final model = TaskModel.create(title: title, scheduledDate: dateTime);
+  Future<void> addTask(String title, DateTime dateTime,
+      {TaskCategory? category}) async {
+    final model = TaskModel.create(
+      title: title,
+      scheduledDate: dateTime,
+      category: category ?? TaskCategory.defaultCategory,
+    );
     await _dataSource.addTask(model);
 
     // Schedule reminders (10 min before and 10 min after)

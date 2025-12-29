@@ -6,7 +6,7 @@ part of 'task_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$addTaskHash() => r'15d791034eab16db57fb1838ef62badd3381f0db';
+String _$addTaskHash() => r'38677d8e0dd916604023f60d358c8eca264720f0';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -42,10 +42,12 @@ class AddTaskFamily extends Family<AsyncValue<void>> {
   AddTaskProvider call({
     required String title,
     required DateTime date,
+    TaskCategory? category,
   }) {
     return AddTaskProvider(
       title: title,
       date: date,
+      category: category,
     );
   }
 
@@ -56,6 +58,7 @@ class AddTaskFamily extends Family<AsyncValue<void>> {
     return call(
       title: provider.title,
       date: provider.date,
+      category: provider.category,
     );
   }
 
@@ -80,11 +83,13 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
   AddTaskProvider({
     required String title,
     required DateTime date,
+    TaskCategory? category,
   }) : this._internal(
           (ref) => addTask(
             ref as AddTaskRef,
             title: title,
             date: date,
+            category: category,
           ),
           from: addTaskProvider,
           name: r'addTaskProvider',
@@ -96,6 +101,7 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
           allTransitiveDependencies: AddTaskFamily._allTransitiveDependencies,
           title: title,
           date: date,
+          category: category,
         );
 
   AddTaskProvider._internal(
@@ -107,10 +113,12 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
     required super.from,
     required this.title,
     required this.date,
+    required this.category,
   }) : super.internal();
 
   final String title;
   final DateTime date;
+  final TaskCategory? category;
 
   @override
   Override overrideWith(
@@ -127,6 +135,7 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
         debugGetCreateSourceHash: null,
         title: title,
         date: date,
+        category: category,
       ),
     );
   }
@@ -140,7 +149,8 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
   bool operator ==(Object other) {
     return other is AddTaskProvider &&
         other.title == title &&
-        other.date == date;
+        other.date == date &&
+        other.category == category;
   }
 
   @override
@@ -148,6 +158,7 @@ class AddTaskProvider extends AutoDisposeFutureProvider<void> {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, title.hashCode);
     hash = _SystemHash.combine(hash, date.hashCode);
+    hash = _SystemHash.combine(hash, category.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -161,6 +172,9 @@ mixin AddTaskRef on AutoDisposeFutureProviderRef<void> {
 
   /// The parameter `date` of this provider.
   DateTime get date;
+
+  /// The parameter `category` of this provider.
+  TaskCategory? get category;
 }
 
 class _AddTaskProviderElement extends AutoDisposeFutureProviderElement<void>
@@ -171,6 +185,8 @@ class _AddTaskProviderElement extends AutoDisposeFutureProviderElement<void>
   String get title => (origin as AddTaskProvider).title;
   @override
   DateTime get date => (origin as AddTaskProvider).date;
+  @override
+  TaskCategory? get category => (origin as AddTaskProvider).category;
 }
 
 String _$deleteTaskHash() => r'e0e396f5ef3a2d68d725537a388d4c9c021faa23';
