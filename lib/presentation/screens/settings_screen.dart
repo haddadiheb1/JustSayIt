@@ -289,7 +289,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (context) => AlertDialog(
         title: Text('Clear All ${type == 'tasks' ? 'Tasks' : 'Notes'}?'),
         content: Text(
-          'This will permanently delete all your ${type}. This action cannot be undone.',
+          'This will permanently delete all your $type. This action cannot be undone.',
         ),
         actions: [
           TextButton(

@@ -26,8 +26,12 @@ class WidgetSyncService {
 
       final jsonList = displayTasks.map((t) {
         // Convert color to hex string #AARRGGBB
-        final colorValue =
-            t.priority.color.value.toRadixString(16).padLeft(8, '0');
+        // Convert color to hex string #AARRGGBB
+        final colorValue = ((t.priority.color.r * 255).toInt() << 16 |
+                (t.priority.color.g * 255).toInt() << 8 |
+                (t.priority.color.b * 255).toInt())
+            .toRadixString(16)
+            .padLeft(6, '0');
         // If today, show time. If future, show date?
         final isToday = DateUtils.isSameDay(t.scheduledDate, DateTime.now());
         final timeStr = isToday

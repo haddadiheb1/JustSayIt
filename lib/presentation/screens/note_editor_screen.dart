@@ -75,8 +75,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void _saveNote() {
-    if (_contentController.text.trim().isEmpty && _selectedImages.isEmpty)
+    if (_contentController.text.trim().isEmpty && _selectedImages.isEmpty) {
       return;
+    }
 
     final String content = _contentController.text.trim();
     final List<String> images = List.from(_selectedImages);
@@ -198,8 +199,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                               image: FileImage(File(imagePath)),
                               fit: BoxFit.cover,
                             ),
-                            border:
-                                Border.all(color: Colors.grey.withOpacity(0.3)),
+                            border: Border.all(
+                                color: Colors.grey.withValues(alpha: 0.3)),
                           ),
                         ),
                         Positioned(
