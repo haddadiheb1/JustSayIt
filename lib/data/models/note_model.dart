@@ -6,6 +6,7 @@ class NoteModel extends HiveObject {
   final String content;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<String> images;
 
   NoteModel({
     required this.id,
@@ -13,9 +14,11 @@ class NoteModel extends HiveObject {
     required this.content,
     required this.createdAt,
     required this.updatedAt,
+    this.images = const [],
   });
 
-  factory NoteModel.create({required String content}) {
+  factory NoteModel.create(
+      {required String content, List<String> images = const []}) {
     final now = DateTime.now();
     final lines = content.trim().split('\n');
     final title = lines.first.isEmpty
@@ -28,6 +31,23 @@ class NoteModel extends HiveObject {
       content: content,
       createdAt: now,
       updatedAt: now,
+      images: images,
+    );
+  }
+
+  NoteModel copyWith({
+    String? title,
+    String? content,
+    List<String>? images,
+    DateTime? updatedAt,
+  }) {
+    return NoteModel(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      images: images ?? this.images,
     );
   }
 }
@@ -45,6 +65,7 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
       content: reader.readString(),
       createdAt: DateTime.fromMillisecondsSinceEpoch(reader.readInt()),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(reader.readInt()),
+      images: (reader.readList()).cast<String>(),
     );
   }
 
@@ -55,5 +76,6 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
     writer.writeString(obj.content);
     writer.writeInt(obj.createdAt.millisecondsSinceEpoch);
     writer.writeInt(obj.updatedAt.millisecondsSinceEpoch);
+    writer.writeList(obj.images);
   }
 }
