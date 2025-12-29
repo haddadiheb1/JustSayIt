@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/core/utils/date_parser.dart';
 import 'package:just_say_it/core/utils/notification_service.dart';
@@ -118,6 +120,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  int _compareTasks(Task a, Task b) {
+    // 1. Sort by Priority (Descending: High > Medium > Low)
+    // High=2, Medium=1, Low=0. So b.compare(a) gives Descending.
+    int priorityComp = b.priority.value.compareTo(a.priority.value);
+    if (priorityComp != 0) return priorityComp;
+
+    // 2. Sort by Date (Ascending: Sooner > Later)
+    return a.scheduledDate.compareTo(b.scheduledDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(taskListProvider);
@@ -190,69 +202,118 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             }
           }
 
-          // Sort by time
-          today.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-          upcoming.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+          // Sort using priority logic
+          today.sort(_compareTasks);
+          upcoming.sort(_compareTasks);
+          // Completed tasks usually sorted by date completed, or just date?
+          // Let's keep date for completed, or priority too?
+          // Usually completed tasks are list history. Latest completed top?
+          // Assuming date for now, descending?
+          completed.sort((a, b) => b.scheduledDate.compareTo(a.scheduledDate));
 
-          return ListView(
+          return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 100),
-            children: [
-              if (today.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text("Today",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryBlue)),
-                ),
-                ...today.asMap().entries.map(
-                    (entry) => TaskCard(task: entry.value, index: entry.key)),
-              ],
-              if (upcoming.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text("Upcoming",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryBlue)),
-                ),
-                ...upcoming.asMap().entries.map(
-                    (entry) => TaskCard(task: entry.value, index: entry.key)),
-              ],
-              if (completed.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.check_circle,
-                          color: Colors.green[600],
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "Completed (${completed.length})",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+            child: Column(
+              children: [
+                if (today.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Today",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryBlue)),
+                    ),
                   ),
-                ),
-                ...completed.asMap().entries.map(
-                    (entry) => TaskCard(task: entry.value, index: entry.key)),
+                  ImplicitlyAnimatedList<Task>(
+                    items: today,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    itemBuilder: (context, animation, item, index) {
+                      return SizeFadeTransition(
+                        sizeFraction: 0.7,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: TaskCard(task: item, index: index),
+                      );
+                    },
+                  ),
+                ],
+                if (upcoming.isNotEmpty) ...[
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Upcoming",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryBlue)),
+                    ),
+                  ),
+                  ImplicitlyAnimatedList<Task>(
+                    items: upcoming,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    itemBuilder: (context, animation, item, index) {
+                      return SizeFadeTransition(
+                        sizeFraction: 0.7,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: TaskCard(task: item, index: index),
+                      );
+                    },
+                  ),
+                ],
+                if (completed.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Colors.green[600],
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          "Completed (${completed.length})",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[700],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ImplicitlyAnimatedList<Task>(
+                    items: completed,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    areItemsTheSame: (a, b) => a.id == b.id,
+                    itemBuilder: (context, animation, item, index) {
+                      return SizeFadeTransition(
+                        sizeFraction: 0.7,
+                        curve: Curves.easeInOut,
+                        animation: animation,
+                        child: TaskCard(task: item, index: index),
+                      );
+                    },
+                  ),
+                ],
               ],
-            ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

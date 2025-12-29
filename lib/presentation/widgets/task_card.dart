@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/domain/entities/task.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
-import 'package:just_say_it/presentation/widgets/task_actions_sheet.dart';
 import 'package:just_say_it/presentation/widgets/task_edit_dialog.dart';
+import 'package:just_say_it/presentation/widgets/priority_selector_sheet.dart';
 
 class TaskCard extends ConsumerStatefulWidget {
   final Task task;
@@ -104,65 +104,84 @@ class _TaskCardState extends ConsumerState<TaskCard>
               boxShadow: [
                 BoxShadow(
                   color: widget.task.isCompleted
-                      ? Colors.grey.withValues(alpha: 0.1)
-                      : AppTheme.primaryBlue.withValues(alpha: 0.15),
+                      ? Colors.black.withValues(alpha: 0.05)
+                      : widget.task.priority.color.withValues(alpha: 0.15),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ],
+              border: Border.all(
+                color: widget.task.isCompleted
+                    ? Colors.transparent
+                    : widget.task.priority.color.withValues(alpha: 0.3),
+                width: 1,
+              ),
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
-                  ref.read(toggleTaskProvider(widget.task));
-                },
-                onLongPress: () {
-                  _showTaskActions(context);
-                },
+                onTap: () => _showEditDialog(context),
+                onLongPress: () => _showPrioritySelector(context),
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      // Animated Checkbox
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 300),
-                        tween: Tween(
-                          begin: 0.0,
-                          end: widget.task.isCompleted ? 1.0 : 0.0,
+                      // Priority Indicator
+                      if (!widget.task.isCompleted)
+                        Container(
+                          width: 4,
+                          height: 32,
+                          margin: const EdgeInsets.only(right: 16),
+                          decoration: BoxDecoration(
+                            color: widget.task.priority.color,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: 1.0 + (value * 0.2),
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
+
+                      // Animated Checkbox
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(toggleTaskProvider(widget.task));
+                        },
+                        child: TweenAnimationBuilder<double>(
+                          duration: const Duration(milliseconds: 300),
+                          tween: Tween(
+                            begin: 0.0,
+                            end: widget.task.isCompleted ? 1.0 : 0.0,
+                          ),
+                          builder: (context, value, child) {
+                            return Transform.scale(
+                              scale: 1.0 + (value * 0.2),
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: widget.task.isCompleted
+                                        ? AppTheme.primaryBlue
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.4),
+                                    width: 2,
+                                  ),
                                   color: widget.task.isCompleted
                                       ? AppTheme.primaryBlue
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.4),
-                                  width: 2,
+                                      : Colors.transparent,
                                 ),
-                                color: widget.task.isCompleted
-                                    ? AppTheme.primaryBlue
-                                    : Colors.transparent,
+                                child: widget.task.isCompleted
+                                    ? const Icon(
+                                        Icons.check,
+                                        size: 18,
+                                        color: Colors.white,
+                                      )
+                                    : null,
                               ),
-                              child: widget.task.isCompleted
-                                  ? const Icon(
-                                      Icons.check,
-                                      size: 18,
-                                      color: Colors.white,
-                                    )
-                                  : null,
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                       const SizedBox(width: 16),
                       // Task Content
@@ -254,47 +273,24 @@ class _TaskCardState extends ConsumerState<TaskCard>
     );
   }
 
-  void _showTaskActions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => TaskActionsSheet(
-        task: widget.task,
-        onEdit: () => _showEditDialog(context),
-        onDelete: () {
-          ref.read(deleteTaskProvider(widget.task.id));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Task "${widget.task.title}" deleted',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.red[600],
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   void _showEditDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => TaskEditDialog(task: widget.task),
+    );
+  }
+
+  void _showPrioritySelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => PrioritySelectorSheet(
+        currentPriority: widget.task.priority,
+        onPrioritySelected: (priority) {
+          final updatedTask = widget.task.copyWith(priority: priority);
+          ref.read(updateTaskProvider(updatedTask));
+        },
+      ),
     );
   }
 }

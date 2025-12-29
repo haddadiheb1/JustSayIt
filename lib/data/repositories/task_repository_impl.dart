@@ -96,6 +96,8 @@ class TaskRepositoryImpl implements TaskRepository {
       title: model.title,
       scheduledDate: model.scheduledDate,
       isCompleted: model.isCompleted,
+      category: model.category,
+      priority: model.priority,
     );
   }
 
@@ -105,6 +107,8 @@ class TaskRepositoryImpl implements TaskRepository {
       title: entity.title,
       scheduledDate: entity.scheduledDate,
       isCompleted: entity.isCompleted,
+      categoryIndex: entity.category.index,
+      priorityIndex: entity.priority.index,
     );
   }
 }

@@ -29,6 +29,7 @@ dependencies:
   hive: ^2.2.3
   shared_preferences: ^2.3.3
   package_info_plus: ^8.1.2
+  animated_list_plus: ^0.5.2
 
 dev_dependencies:
   flutter_test:
