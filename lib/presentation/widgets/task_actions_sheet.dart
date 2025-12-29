@@ -29,7 +29,7 @@ class TaskActionsSheet extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(28),
                 ),
@@ -49,7 +49,7 @@ class TaskActionsSheet extends ConsumerWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).dividerColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -58,9 +58,10 @@ class TaskActionsSheet extends ConsumerWidget {
                   // Task title
                   Text(
                     task.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -70,7 +71,7 @@ class TaskActionsSheet extends ConsumerWidget {
                   // Edit action
                   _ActionTile(
                     icon: Icons.edit_outlined,
-                    iconColor: AppTheme.primaryBlue,
+                    iconColor: Theme.of(context).colorScheme.primary,
                     title: 'Edit Task',
                     subtitle: 'Modify title, date, or time',
                     onTap: () {
@@ -83,7 +84,7 @@ class TaskActionsSheet extends ConsumerWidget {
                   // Delete action
                   _ActionTile(
                     icon: Icons.delete_outline,
-                    iconColor: AppTheme.errorRed,
+                    iconColor: AppTheme.error,
                     title: 'Delete Task',
                     subtitle: 'Remove this task permanently',
                     onTap: () {
@@ -123,7 +124,7 @@ class TaskActionsSheet extends ConsumerWidget {
               onDelete();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorRed,
+              backgroundColor: AppTheme.error,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -162,7 +163,7 @@ class _ActionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -192,13 +193,20 @@ class _ActionTile extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[600],
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.6),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey[400]),
+              Icon(Icons.chevron_right,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.4)),
             ],
           ),
         ),

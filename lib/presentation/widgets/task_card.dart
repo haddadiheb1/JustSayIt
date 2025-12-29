@@ -86,10 +86,19 @@ class _TaskCardState extends ConsumerState<TaskCard>
             decoration: BoxDecoration(
               gradient: isOverdue
                   ? LinearGradient(
-                      colors: [Colors.red[50]!, Colors.red[100]!],
+                      colors: [
+                        AppTheme.error.withValues(alpha: 0.1),
+                        AppTheme.error.withValues(alpha: 0.2)
+                      ],
                     )
                   : LinearGradient(
-                      colors: [Colors.white, Colors.grey[50]!],
+                      colors: [
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withValues(alpha: 0.95)
+                      ],
                     ),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
@@ -134,7 +143,10 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                 border: Border.all(
                                   color: widget.task.isCompleted
                                       ? AppTheme.primaryBlue
-                                      : Colors.grey[400]!,
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.4),
                                   width: 2,
                                 ),
                                 color: widget.task.isCompleted
@@ -165,8 +177,11 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                     ? TextDecoration.lineThrough
                                     : null,
                                 color: widget.task.isCompleted
-                                    ? Colors.grey
-                                    : Colors.black87,
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5)
+                                    : Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -180,7 +195,10 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                   size: 14,
                                   color: isOverdue
                                       ? AppTheme.errorRed
-                                      : Colors.grey[600],
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.6),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -189,7 +207,10 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                   style: TextStyle(
                                     color: isOverdue
                                         ? AppTheme.errorRed
-                                        : Colors.grey[600],
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.6),
                                     fontSize: 13,
                                     fontWeight: isOverdue
                                         ? FontWeight.w600

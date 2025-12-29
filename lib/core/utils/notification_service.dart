@@ -30,25 +30,98 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<void> init() async {
+    debugPrint('🔔 Initializing notification service...');
     tz.initializeTimeZones();
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    // Request permissions for Android 13+
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    // Request notification permissions for Android 13+
+    final androidImplementation =
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      debugPrint('📱 Requesting notification permission...');
+      final granted =
+          await androidImplementation.requestNotificationsPermission();
+      debugPrint('📱 Notification permission granted: $granted');
+
+      // Request exact alarm permission for Android 12+
+      debugPrint('⏰ Requesting exact alarm permission...');
+      final exactAlarmGranted =
+          await androidImplementation.requestExactAlarmsPermission();
+      debugPrint('⏰ Exact alarm permission granted: $exactAlarmGranted');
+    }
+
+    // Create notification channel
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'task_reminders',
+      'Task Reminders',
+      description: 'Reminders for your scheduled tasks',
+      importance: Importance.high,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await androidImplementation?.createNotificationChannel(channel);
+    debugPrint('✅ Notification channel created');
 
     await _notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        // Handle notification tap
-      },
+      onDidReceiveNotificationResponse: _handleNotificationResponse,
     );
+
+    debugPrint('✅ Notification service initialized');
+  }
+
+  // Handle notification actions
+  void _handleNotificationResponse(NotificationResponse response) {
+    debugPrint('📱 Notification action: ${response.actionId}');
+    debugPrint('📱 Payload: ${response.payload}');
+
+    if (response.payload == null) return;
+
+    final taskId = response.payload!;
+
+    if (response.actionId == 'snooze') {
+      _snoozeTask(taskId);
+    } else if (response.actionId == 'mark_done') {
+      _markTaskDone(taskId);
+    }
+  }
+
+  void _snoozeTask(String taskId) {
+    debugPrint('⏰ Snoozing task: $taskId for 10 minutes');
+    // Will be handled by repository
+  }
+
+  void _markTaskDone(String taskId) {
+    debugPrint('✅ Marking task done: $taskId');
+    // Will be handled by repository
+  }
+
+  // Add method to show immediate test notification
+  Future<void> showTestNotification() async {
+    debugPrint('🧪 Showing test notification...');
+    await _notificationsPlugin.show(
+      999,
+      '🔔 Test Notification',
+      'If you see this, notifications are working!',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Reminders for your scheduled tasks',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
+    debugPrint('✅ Test notification shown');
   }
 
   @override
@@ -107,31 +180,70 @@ class NotificationServiceImpl implements NotificationService {
     debugPrint('📅 Scheduling reminder for task: $taskTitle');
     debugPrint('   Task time: $taskDate');
     debugPrint('   Reminder time: $reminderTime');
-    debugPrint('   Current time: ${DateTime.now()}');
-    debugPrint(
-        '   Time until reminder: ${reminderTime.difference(DateTime.now())}');
 
     // Skip if reminder time is in the past
     if (reminderTime.isBefore(DateTime.now())) {
-      debugPrint('⚠️ Reminder time is in the past, skipping notification');
+      debugPrint('⚠️ Reminder time is in the past, skipping');
       return;
     }
 
-    // Convert task ID string to integer for notification ID
     final notificationId = taskId.hashCode.abs();
-    debugPrint('   Notification ID: $notificationId');
+    final tzReminderTime = tz.TZDateTime.from(reminderTime, tz.local);
 
-    // Schedule the reminder notification
-    try {
-      await scheduleNotification(
-        id: notificationId,
-        title: '⏰ Task Reminder',
-        body: 'Your task "$taskTitle" starts in 10 minutes!',
-        scheduledDate: reminderTime,
-      );
-      debugPrint('✅ Notification scheduled successfully!');
-    } catch (e) {
-      debugPrint('❌ Error scheduling notification: $e');
-    }
+    // Format time for notification
+    final timeStr =
+        '${taskDate.hour.toString().padLeft(2, '0')}:${taskDate.minute.toString().padLeft(2, '0')}';
+
+    await _notificationsPlugin.zonedSchedule(
+      notificationId,
+      '⏰ Reminder: $taskTitle',
+      'Scheduled for $timeStr (in 10 minutes)',
+      tzReminderTime,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Reminders for your scheduled tasks',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+          actions: <AndroidNotificationAction>[
+            const AndroidNotificationAction(
+              'snooze',
+              'Snooze 10 min',
+              showsUserInterface: false,
+            ),
+            const AndroidNotificationAction(
+              'mark_done',
+              'Mark Done',
+              showsUserInterface: false,
+            ),
+          ],
+        ),
+      ),
+      payload: taskId,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+
+    debugPrint('✅ Reminder scheduled successfully');
+
+    // Show immediate test notification to verify delivery works
+    debugPrint('🧪 Showing test notification to verify delivery...');
+    await _notificationsPlugin.show(
+      99999,
+      '✅ Task Reminder Scheduled',
+      'Your reminder for "$taskTitle" is set for $timeStr',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Reminders for your scheduled tasks',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+    );
   }
 }

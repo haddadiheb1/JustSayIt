@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/domain/entities/task.dart';
 import 'package:just_say_it/presentation/providers/task_provider.dart';
 
@@ -76,7 +75,7 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(28),
                 ),
                 child: Column(
@@ -89,22 +88,26 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.edit,
-                            color: AppTheme.primaryBlue,
+                            color: Theme.of(context).colorScheme.primary,
                             size: 24,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Edit Task',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -126,7 +129,10 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withValues(alpha: 0.5),
                       ),
                       autofocus: true,
                       maxLines: 2,
@@ -140,22 +146,28 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey[300]!),
+                          border:
+                              Border.all(color: Theme.of(context).dividerColor),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color:
-                                    AppTheme.primaryBlue.withValues(alpha: 0.1),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.calendar_today,
-                                color: AppTheme.primaryBlue,
+                                color: Theme.of(context).colorScheme.primary,
                                 size: 20,
                               ),
                             ),
@@ -183,7 +195,11 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
                                 ],
                               ),
                             ),
-                            Icon(Icons.chevron_right, color: Colors.grey[400]),
+                            Icon(Icons.chevron_right,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4)),
                           ],
                         ),
                       ),
@@ -211,7 +227,8 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
                           child: ElevatedButton(
                             onPressed: _saveChanges,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryBlue,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
