@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_say_it/presentation/screens/home_screen.dart';
 import 'package:just_say_it/presentation/screens/notes_screen.dart';
+import 'package:just_say_it/presentation/screens/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -15,6 +16,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     NotesScreen(),
+    SettingsScreen(),
   ];
 
   @override
@@ -43,114 +45,68 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        height: 65,
+        margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
-            width: 1,
-          ),
         ),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                icon: Icons.checklist_rounded,
-                selectedIcon: Icons.checklist_rounded,
-                label: 'Tasks',
-                index: 0,
-              ),
-              _buildNavItem(
-                icon: Icons.sticky_note_2_outlined,
-                selectedIcon: Icons.sticky_note_2_rounded,
-                label: 'Notes',
-                index: 1,
-              ),
-            ],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavIcon(
+              icon: Icons.checklist_rounded,
+              index: 0,
+            ),
+            _buildNavIcon(
+              icon: Icons.sticky_note_2_rounded,
+              index: 1,
+            ),
+            _buildNavIcon(
+              icon: Icons.settings_outlined,
+              index: 2,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem({
+  Widget _buildNavIcon({
     required IconData icon,
-    required IconData selectedIcon,
-    required String label,
     required int index,
   }) {
     final isSelected = _currentIndex == index;
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          padding: EdgeInsets.symmetric(
-              vertical: 8, horizontal: isSelected ? 16 : 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(
-                    scale: animation,
-                    child: child,
-                  );
-                },
-                child: Icon(
-                  isSelected ? selectedIcon : icon,
-                  key: ValueKey<bool>(isSelected),
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.5),
-                  size: isSelected ? 28 : 24,
-                ),
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                child: isSelected
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isSelected
+              ? Colors.white
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          size: 24,
         ),
       ),
     );

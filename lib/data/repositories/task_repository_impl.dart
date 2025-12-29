@@ -39,19 +39,18 @@ class TaskRepositoryImpl implements TaskRepository {
     final model = TaskModel.create(title: title, scheduledDate: dateTime);
     await _dataSource.addTask(model);
 
-    // Schedule reminder notification
-    await _notificationService.scheduleTaskReminder(
+    // Schedule reminders (10 min before and 10 min after)
+    await _notificationService.scheduleTaskReminders(
       taskId: model.id,
       taskTitle: model.title,
-      taskDate: model.scheduledDate,
+      taskTime: model.scheduledDate,
     );
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    // Cancel reminder notification
-    final notificationId = id.hashCode.abs();
-    await _notificationService.cancelNotification(notificationId);
+    // Cancel notification
+    await _notificationService.cancelNotification(id);
 
     await _dataSource.deleteTask(id);
   }
@@ -60,6 +59,18 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<void> updateTask(Task task) async {
     final model = _mapToModel(task);
     await _dataSource.updateTask(model);
+
+    // Cancel old notifications and reschedule with new time
+    await _notificationService.cancelNotification(task.id);
+
+    // Only reschedule if task is not completed
+    if (!task.isCompleted) {
+      await _notificationService.scheduleTaskReminders(
+        taskId: task.id,
+        taskTitle: task.title,
+        taskTime: task.scheduledDate,
+      );
+    }
   }
 
   @override
@@ -67,10 +78,9 @@ class TaskRepositoryImpl implements TaskRepository {
     final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
     await updateTask(updatedTask);
 
-    // Cancel reminder if task is being completed
+    // Cancel notification if task is being completed
     if (updatedTask.isCompleted) {
-      final notificationId = task.id.hashCode.abs();
-      await _notificationService.cancelNotification(notificationId);
+      await _notificationService.cancelNotification(task.id);
     }
   }
 

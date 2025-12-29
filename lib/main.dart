@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/presentation/screens/main_navigation_screen.dart';
+import 'package:just_say_it/presentation/providers/settings_provider.dart';
 import 'package:just_say_it/data/models/task_model.dart';
 import 'package:just_say_it/data/models/note_model.dart';
 
@@ -27,17 +28,19 @@ void main() async {
   runApp(const ProviderScope(child: VoiceTaskApp()));
 }
 
-class VoiceTaskApp extends StatelessWidget {
+class VoiceTaskApp extends ConsumerWidget {
   const VoiceTaskApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
-      title: 'Voice To Task',
+      title: 'Just Say It',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       home: const MainNavigationScreen(),
     );
   }
