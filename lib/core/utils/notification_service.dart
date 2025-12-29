@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -27,6 +28,18 @@ class NotificationServiceImpl implements NotificationService {
     debugPrint('🔔 Initializing notification service...');
     tz.initializeTimeZones();
 
+    // Get and set the local timezone
+    try {
+      final dynamic localTimezone = await FlutterTimezone.getLocalTimezone();
+      final String timeZoneName = localTimezone.toString();
+
+      debugPrint('🌍 Local timezone: $timeZoneName');
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (e) {
+      debugPrint('Could not get local timezone: $e');
+      // Fallback or leave default (UTC)
+    }
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -47,6 +60,21 @@ class NotificationServiceImpl implements NotificationService {
 
     await _notificationsPlugin.initialize(initializationSettings);
 
+    // Create the channel explicitly
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'task_reminders', // id
+      'Task Reminders', // title
+      description: 'Reminders for your tasks', // description
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
     debugPrint('✅ Notification service initialized');
   }
 
@@ -62,13 +90,13 @@ class NotificationServiceImpl implements NotificationService {
     debugPrint('   Task time: $taskTime');
     debugPrint('   Current time: $now');
 
-    // Schedule notification 10 minutes BEFORE task time
-    final beforeTime = taskTime.subtract(const Duration(minutes: 10));
+    // Schedule notification 5 minutes BEFORE task time
+    final beforeTime = taskTime.subtract(const Duration(minutes: 5));
     if (beforeTime.isAfter(now)) {
       await _scheduleNotification(
         id: '${taskId}_before',
         title: '⏰ Task Starting Soon',
-        body: '$taskTitle starts in 10 minutes',
+        body: '$taskTitle starts in 5 minutes',
         scheduledTime: beforeTime,
       );
       debugPrint('✅ Scheduled "before" reminder at: $beforeTime');
@@ -76,8 +104,8 @@ class NotificationServiceImpl implements NotificationService {
       debugPrint('⚠️ Skipped "before" reminder (time is in the past)');
     }
 
-    // Schedule notification 10 minutes AFTER task time (overdue reminder)
-    final afterTime = taskTime.add(const Duration(minutes: 10));
+    // Schedule notification 5 minutes AFTER task time (overdue reminder)
+    final afterTime = taskTime.add(const Duration(minutes: 5));
     if (afterTime.isAfter(now)) {
       await _scheduleNotification(
         id: '${taskId}_after',
@@ -99,6 +127,7 @@ class NotificationServiceImpl implements NotificationService {
   }) async {
     try {
       final notificationId = id.hashCode.abs();
+      // Use tz.local which is now correctly set
       final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
 
       debugPrint('   Scheduling notification ID: $notificationId');
@@ -116,13 +145,13 @@ class NotificationServiceImpl implements NotificationService {
             'task_reminders',
             'Task Reminders',
             channelDescription: 'Reminders for your tasks',
-            importance: Importance.high,
+            importance: Importance.max,
             priority: Priority.high,
             enableVibration: true,
             playSound: true,
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
