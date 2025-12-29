@@ -180,6 +180,9 @@ class NotificationServiceImpl implements NotificationService {
     debugPrint('📅 Scheduling reminder for task: $taskTitle');
     debugPrint('   Task time: $taskDate');
     debugPrint('   Reminder time: $reminderTime');
+    debugPrint('   Current time: ${DateTime.now()}');
+    debugPrint(
+        '   Time until reminder: ${reminderTime.difference(DateTime.now())}');
 
     // Skip if reminder time is in the past
     if (reminderTime.isBefore(DateTime.now())) {
@@ -190,44 +193,55 @@ class NotificationServiceImpl implements NotificationService {
     final notificationId = taskId.hashCode.abs();
     final tzReminderTime = tz.TZDateTime.from(reminderTime, tz.local);
 
+    debugPrint('   Notification ID: $notificationId');
+    debugPrint('   TZ Reminder time: $tzReminderTime');
+    debugPrint('   TZ Local: ${tz.local.name}');
+
     // Format time for notification
     final timeStr =
         '${taskDate.hour.toString().padLeft(2, '0')}:${taskDate.minute.toString().padLeft(2, '0')}';
 
-    await _notificationsPlugin.zonedSchedule(
-      notificationId,
-      '⏰ Reminder: $taskTitle',
-      'Scheduled for $timeStr (in 10 minutes)',
-      tzReminderTime,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          'task_reminders',
-          'Task Reminders',
-          channelDescription: 'Reminders for your scheduled tasks',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-          actions: <AndroidNotificationAction>[
-            const AndroidNotificationAction(
-              'snooze',
-              'Snooze 10 min',
-              showsUserInterface: false,
-            ),
-            const AndroidNotificationAction(
-              'mark_done',
-              'Mark Done',
-              showsUserInterface: false,
-            ),
-          ],
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        notificationId,
+        '⏰ Reminder: $taskTitle',
+        'Scheduled for $timeStr (in 10 minutes)',
+        tzReminderTime,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'task_reminders',
+            'Task Reminders',
+            channelDescription: 'Reminders for your scheduled tasks',
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            fullScreenIntent: true,
+            enableVibration: true,
+            playSound: true,
+            actions: <AndroidNotificationAction>[
+              const AndroidNotificationAction(
+                'snooze',
+                'Snooze 10 min',
+                showsUserInterface: false,
+              ),
+              const AndroidNotificationAction(
+                'mark_done',
+                'Mark Done',
+                showsUserInterface: false,
+              ),
+            ],
+          ),
         ),
-      ),
-      payload: taskId,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-
-    debugPrint('✅ Reminder scheduled successfully');
+        payload: taskId,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      debugPrint('✅ Reminder scheduled successfully with ID: $notificationId');
+    } catch (e) {
+      debugPrint('❌ Error scheduling reminder: $e');
+      rethrow;
+    }
 
     // Show immediate test notification to verify delivery works
     debugPrint('🧪 Showing test notification to verify delivery...');
