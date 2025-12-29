@@ -244,11 +244,16 @@ class NotificationServiceImpl implements NotificationService {
     }
 
     // Show immediate test notification to verify delivery works
-    debugPrint('🧪 Showing test notification to verify delivery...');
+    debugPrint('🧪 Showing confirmation notification...');
+
+    // Calculate reminder time for display
+    final reminderTimeStr =
+        '${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}';
+
     await _notificationsPlugin.show(
       99999,
-      '✅ Task Reminder Scheduled',
-      'Your reminder for "$taskTitle" is set for $timeStr',
+      '✅ Reminder Set',
+      'You\'ll be reminded at $reminderTimeStr (10 min before "$taskTitle")',
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'task_reminders',

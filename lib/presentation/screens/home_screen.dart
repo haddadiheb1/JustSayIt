@@ -12,6 +12,7 @@ import 'package:just_say_it/presentation/widgets/mic_button.dart';
 import 'package:just_say_it/presentation/widgets/task_card.dart';
 import 'package:just_say_it/presentation/widgets/task_confirm_sheet.dart';
 import 'package:just_say_it/presentation/widgets/voice_capture_sheet.dart';
+import 'package:just_say_it/presentation/screens/manual_task_entry_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -123,7 +124,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Voice Tasks"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Voice Tasks',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ManualTaskEntryScreen(),
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.edit_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            tooltip: 'Add task manually',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: tasksAsync.when(
         data: (tasks) {

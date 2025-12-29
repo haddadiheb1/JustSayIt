@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_say_it/core/theme/app_theme.dart';
 import 'package:just_say_it/presentation/screens/home_screen.dart';
 import 'package:just_say_it/presentation/screens/notes_screen.dart';
 
@@ -44,36 +43,40 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         ),
       ),
       bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
-              offset: const Offset(0, -4),
+              offset: const Offset(0, 8),
             ),
           ],
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+            width: 1,
+          ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.task_outlined,
-                  selectedIcon: Icons.task,
-                  label: 'Tasks',
-                  index: 0,
-                ),
-                _buildNavItem(
-                  icon: Icons.note_outlined,
-                  selectedIcon: Icons.note,
-                  label: 'Notes',
-                  index: 1,
-                ),
-              ],
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(
+                icon: Icons.checklist_rounded,
+                selectedIcon: Icons.checklist_rounded,
+                label: 'Tasks',
+                index: 0,
+              ),
+              _buildNavItem(
+                icon: Icons.sticky_note_2_outlined,
+                selectedIcon: Icons.sticky_note_2_rounded,
+                label: 'Notes',
+                index: 1,
+              ),
+            ],
           ),
         ),
       ),
@@ -96,40 +99,55 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           });
         },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.symmetric(
+              vertical: 8, horizontal: isSelected ? 16 : 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppTheme.primaryIndigo.withValues(alpha: 0.1)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Column(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) {
+                  return ScaleTransition(
+                    scale: animation,
+                    child: child,
+                  );
+                },
                 child: Icon(
                   isSelected ? selectedIcon : icon,
                   key: ValueKey<bool>(isSelected),
                   color: isSelected
-                      ? AppTheme.primaryIndigo
-                      : AppTheme.textSecondary,
-                  size: 26,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.5),
+                  size: isSelected ? 28 : 24,
                 ),
               ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? AppTheme.primaryIndigo
-                      : AppTheme.textSecondary,
-                ),
-                child: Text(label),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: isSelected
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
