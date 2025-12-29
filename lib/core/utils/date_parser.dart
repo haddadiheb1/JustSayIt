@@ -68,10 +68,10 @@ class DateTimeParser {
       cleanText = _removeKeyword(cleanText, 'next week');
     }
 
-    // 2. Extract Time (e.g., "at 5 pm", "18:00")
-    // Regex for "at 5 pm", "at 5:30 am", "5pm"
+    // 2. Extract Time (e.g., "at 5 pm", "18:00", "8 p.m", "5:30am")
+    // Improved regex to handle: "at 8 pm", "8 p.m", "8pm", "5:30 a.m", etc.
     final timeRegex = RegExp(
-      r'(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?',
+      r'(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)',
       caseSensitive: false,
     );
     final match = timeRegex.firstMatch(cleanText);
@@ -83,7 +83,7 @@ class DateTimeParser {
 
       final hourStr = match.group(1);
       final minuteStr = match.group(2) ?? '00';
-      final meridiem = match.group(3)?.toLowerCase();
+      final meridiem = match.group(3)?.replaceAll('.', '').toLowerCase();
 
       int hour = int.parse(hourStr!);
       int minute = int.parse(minuteStr);
@@ -105,7 +105,7 @@ class DateTimeParser {
       // Only time provided, assume today
       final hourStr = match.group(1);
       final minuteStr = match.group(2) ?? '00';
-      final meridiem = match.group(3)?.toLowerCase();
+      final meridiem = match.group(3)?.replaceAll('.', '').toLowerCase();
 
       int hour = int.parse(hourStr!);
       int minute = int.parse(minuteStr);

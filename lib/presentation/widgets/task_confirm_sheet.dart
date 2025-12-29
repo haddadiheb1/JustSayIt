@@ -82,7 +82,7 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                 bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(28)),
                 boxShadow: [
@@ -120,7 +120,8 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: AppTheme.secondaryGray,
+              fillColor:
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
             ),
             autofocus: true,
           ),
@@ -131,12 +132,16 @@ class _TaskConfirmSheetState extends ConsumerState<TaskConfirmSheet> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.secondaryGray,
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, color: AppTheme.primaryBlue),
+                  Icon(Icons.calendar_today,
+                      color: Theme.of(context).colorScheme.primary),
                   const Gap(12),
                   Text(
                     DateFormat('EEE, MMM d • h:mm a').format(_selectedDate),

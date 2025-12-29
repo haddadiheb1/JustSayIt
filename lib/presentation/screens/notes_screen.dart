@@ -34,7 +34,7 @@ class NotesScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -42,7 +42,10 @@ class NotesScreen extends ConsumerWidget {
                     'Capture ideas fast',
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
                     ),
                   ),
                 ],

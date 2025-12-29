@@ -49,10 +49,10 @@ class NoteCard extends StatelessWidget {
               children: [
                 Text(
                   note.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -63,7 +63,10 @@ class NoteCard extends StatelessWidget {
                     note.content,
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppTheme.textSecondary,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
                       height: 1.4,
                     ),
                     maxLines: 2,

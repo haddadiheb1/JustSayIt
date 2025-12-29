@@ -104,9 +104,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 maxHeight: 400,
               ),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceLight,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.divider),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: TextField(
                 controller: _contentController,
@@ -120,10 +120,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   height: 1.5,
-                  color: AppTheme.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
