@@ -61,11 +61,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     notifier.update("");
 
     debugPrint('Starting speech recognition...');
-    await speechService.startListening(onResult: (text) {
-      debugPrint('Speech result received: "$text"');
-      _capturedText = text; // Store in local variable
-      notifier.update(text); // Also update provider for UI
-    });
+    await speechService.startListening(
+      onResult: (text) {
+        debugPrint('Speech result received: "$text"');
+        _capturedText = text; // Store in local variable
+        notifier.update(text); // Also update provider for UI
+      },
+      onSoundLevelChange: (level) {
+        ref.read(speechLevelProvider.notifier).update(level);
+      },
+    );
     debugPrint('Speech recognition started');
   }
 

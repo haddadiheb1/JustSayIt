@@ -23,3 +23,13 @@ class ListeningState extends _$ListeningState {
     state = isListening;
   }
 }
+
+@riverpod
+class SpeechLevel extends _$SpeechLevel {
+  @override
+  double build() => 0.0;
+
+  void update(double level) {
+    state = level;
+  }
+}

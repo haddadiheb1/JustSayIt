@@ -7,7 +7,10 @@ final speechServiceProvider =
 
 abstract class SpeechService {
   Future<bool> init();
-  Future<void> startListening({required Function(String) onResult});
+  Future<void> startListening({
+    required Function(String) onResult,
+    Function(double)? onSoundLevelChange,
+  });
   Future<void> stopListening();
   bool get isListening;
 }
@@ -31,7 +34,10 @@ class SpeechServiceImpl implements SpeechService {
   }
 
   @override
-  Future<void> startListening({required Function(String) onResult}) async {
+  Future<void> startListening({
+    required Function(String) onResult,
+    Function(double)? onSoundLevelChange,
+  }) async {
     debugPrint('startListening called, _isEnabled: $_isEnabled');
     if (!_isEnabled) {
       debugPrint('Speech not enabled, initializing...');
@@ -46,6 +52,7 @@ class SpeechServiceImpl implements SpeechService {
               'onResult callback: ${result.recognizedWords}, isFinal: ${result.finalResult}');
           onResult(result.recognizedWords);
         },
+        onSoundLevelChange: onSoundLevelChange,
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
         listenOptions: SpeechListenOptions(

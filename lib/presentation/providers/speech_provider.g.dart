@@ -37,5 +37,20 @@ final listeningStateProvider =
 );
 
 typedef _$ListeningState = AutoDisposeNotifier<bool>;
+String _$speechLevelHash() => r'a7dd7af0fe4b61f376846616f77b18de205a7706';
+
+/// See also [SpeechLevel].
+@ProviderFor(SpeechLevel)
+final speechLevelProvider =
+    AutoDisposeNotifierProvider<SpeechLevel, double>.internal(
+  SpeechLevel.new,
+  name: r'speechLevelProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$speechLevelHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$SpeechLevel = AutoDisposeNotifier<double>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
