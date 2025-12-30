@@ -18,10 +18,6 @@ class _ManualTaskEntryScreenState extends ConsumerState<ManualTaskEntryScreen> {
   @override
   void initState() {
     super.initState();
-    // Auto-focus on text field when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
   }
 
   @override
@@ -107,6 +103,7 @@ class _ManualTaskEntryScreenState extends ConsumerState<ManualTaskEntryScreen> {
               child: TextField(
                 controller: _titleController,
                 focusNode: _focusNode,
+                autofocus: true,
                 style: TextStyle(
                   fontSize: 18,
                   color: Theme.of(context).colorScheme.onSurface,

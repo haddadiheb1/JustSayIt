@@ -160,47 +160,100 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               ),
               child: Column(
                 children: [
-                  TextField(
-                    controller: _titleController,
-                    enabled: true, // Only allow editing if proper
-                    decoration: const InputDecoration(
-                      hintText: 'Title',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      hintStyle: TextStyle(
-                        color: AppTheme.textSecondary,
+                  if (_isEditing)
+                    Hero(
+                      tag: 'note_title_${widget.note!.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: TextField(
+                          controller: _titleController,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            hintText: 'Title',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            hintStyle: TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    TextField(
+                      controller: _titleController,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Title',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        hintStyle: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
                   Divider(
                       color: Theme.of(context)
                           .dividerColor
                           .withValues(alpha: 0.2)),
-                  TextField(
-                    controller: _contentController,
-                    autofocus: !_isEditing,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      hintText: 'Start typing your note...',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(16),
-                      hintStyle: TextStyle(
-                        color: AppTheme.textSecondary,
+                  if (_isEditing)
+                    Hero(
+                      tag: 'note_content_${widget.note!.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: TextField(
+                          controller: _contentController,
+                          autofocus: !_isEditing,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: 'Start typing your note...',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(16),
+                            hintStyle: TextStyle(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.5,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    TextField(
+                      controller: _contentController,
+                      autofocus: !_isEditing,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        hintText: 'Start typing your note...',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(16),
+                        hintStyle: TextStyle(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.5,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
                 ],
               ),
             ),

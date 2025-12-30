@@ -94,19 +94,24 @@ class NoteCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       if (note.content.isNotEmpty) ...[
-                        Text(
-                          note.content.replaceAll(
-                              '\n', ' '), // flattening content preview
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.7),
-                            height: 1.4,
+                        Hero(
+                          tag: 'note_content_${note.id}',
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Text(
+                              note.content.replaceAll('\n', ' '),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.7),
+                                height: 1.4,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
                       ],
