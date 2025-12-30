@@ -15,6 +15,7 @@ import 'package:say_task/presentation/widgets/task_card.dart';
 import 'package:say_task/presentation/widgets/task_confirm_sheet.dart';
 import 'package:say_task/presentation/widgets/voice_capture_sheet.dart';
 import 'package:say_task/presentation/screens/manual_task_entry_screen.dart';
+import 'package:say_task/presentation/screens/stats_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -160,6 +161,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: Theme.of(context).colorScheme.primary,
             ),
             tooltip: 'Add task manually',
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StatsScreen()),
+              );
+            },
+            icon: Icon(
+              Icons.bar_chart_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            tooltip: 'View Stats',
           ),
           const SizedBox(width: 8),
         ],

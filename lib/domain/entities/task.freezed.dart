@@ -19,6 +19,7 @@ mixin _$Task {
   String get id => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
   DateTime get scheduledDate => throw _privateConstructorUsedError;
+  DateTime? get completedAt => throw _privateConstructorUsedError;
   bool get isCompleted => throw _privateConstructorUsedError;
   TaskCategory get category => throw _privateConstructorUsedError;
   TaskPriority get priority => throw _privateConstructorUsedError;
@@ -38,6 +39,7 @@ abstract class $TaskCopyWith<$Res> {
       {String id,
       String title,
       DateTime scheduledDate,
+      DateTime? completedAt,
       bool isCompleted,
       TaskCategory category,
       TaskPriority priority});
@@ -61,6 +63,7 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
     Object? id = null,
     Object? title = null,
     Object? scheduledDate = null,
+    Object? completedAt = freezed,
     Object? isCompleted = null,
     Object? category = null,
     Object? priority = null,
@@ -78,6 +81,10 @@ class _$TaskCopyWithImpl<$Res, $Val extends Task>
           ? _value.scheduledDate
           : scheduledDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       isCompleted: null == isCompleted
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -105,6 +112,7 @@ abstract class _$$TaskImplCopyWith<$Res> implements $TaskCopyWith<$Res> {
       {String id,
       String title,
       DateTime scheduledDate,
+      DateTime? completedAt,
       bool isCompleted,
       TaskCategory category,
       TaskPriority priority});
@@ -125,6 +133,7 @@ class __$$TaskImplCopyWithImpl<$Res>
     Object? id = null,
     Object? title = null,
     Object? scheduledDate = null,
+    Object? completedAt = freezed,
     Object? isCompleted = null,
     Object? category = null,
     Object? priority = null,
@@ -142,6 +151,10 @@ class __$$TaskImplCopyWithImpl<$Res>
           ? _value.scheduledDate
           : scheduledDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      completedAt: freezed == completedAt
+          ? _value.completedAt
+          : completedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       isCompleted: null == isCompleted
           ? _value.isCompleted
           : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -165,6 +178,7 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
       {required this.id,
       required this.title,
       required this.scheduledDate,
+      this.completedAt,
       this.isCompleted = false,
       this.category = TaskCategory.defaultCategory,
       this.priority = TaskPriority.medium});
@@ -175,6 +189,8 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
   final String title;
   @override
   final DateTime scheduledDate;
+  @override
+  final DateTime? completedAt;
   @override
   @JsonKey()
   final bool isCompleted;
@@ -187,7 +203,7 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Task(id: $id, title: $title, scheduledDate: $scheduledDate, isCompleted: $isCompleted, category: $category, priority: $priority)';
+    return 'Task(id: $id, title: $title, scheduledDate: $scheduledDate, completedAt: $completedAt, isCompleted: $isCompleted, category: $category, priority: $priority)';
   }
 
   @override
@@ -198,6 +214,7 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
       ..add(DiagnosticsProperty('id', id))
       ..add(DiagnosticsProperty('title', title))
       ..add(DiagnosticsProperty('scheduledDate', scheduledDate))
+      ..add(DiagnosticsProperty('completedAt', completedAt))
       ..add(DiagnosticsProperty('isCompleted', isCompleted))
       ..add(DiagnosticsProperty('category', category))
       ..add(DiagnosticsProperty('priority', priority));
@@ -212,6 +229,8 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
             (identical(other.title, title) || other.title == title) &&
             (identical(other.scheduledDate, scheduledDate) ||
                 other.scheduledDate == scheduledDate) &&
+            (identical(other.completedAt, completedAt) ||
+                other.completedAt == completedAt) &&
             (identical(other.isCompleted, isCompleted) ||
                 other.isCompleted == isCompleted) &&
             (identical(other.category, category) ||
@@ -221,8 +240,8 @@ class _$TaskImpl with DiagnosticableTreeMixin implements _Task {
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, title, scheduledDate, isCompleted, category, priority);
+  int get hashCode => Object.hash(runtimeType, id, title, scheduledDate,
+      completedAt, isCompleted, category, priority);
 
   /// Create a copy of Task
   /// with the given fields replaced by the non-null parameter values.
@@ -238,6 +257,7 @@ abstract class _Task implements Task {
       {required final String id,
       required final String title,
       required final DateTime scheduledDate,
+      final DateTime? completedAt,
       final bool isCompleted,
       final TaskCategory category,
       final TaskPriority priority}) = _$TaskImpl;
@@ -248,6 +268,8 @@ abstract class _Task implements Task {
   String get title;
   @override
   DateTime get scheduledDate;
+  @override
+  DateTime? get completedAt;
   @override
   bool get isCompleted;
   @override

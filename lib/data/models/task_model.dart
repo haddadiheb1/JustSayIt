@@ -7,6 +7,7 @@ class TaskModel extends HiveObject {
   final String id;
   final String title;
   final DateTime scheduledDate;
+  final DateTime? completedAt;
   final bool isCompleted;
   final int categoryIndex; // Store as int for Hive
   final int priorityIndex; // Store as int for Hive
@@ -15,6 +16,7 @@ class TaskModel extends HiveObject {
     required this.id,
     required this.title,
     required this.scheduledDate,
+    this.completedAt,
     this.isCompleted = false,
     this.categoryIndex = 0, // Default category
     this.priorityIndex = 1, // Default priority (Medium)
@@ -42,6 +44,7 @@ class TaskModel extends HiveObject {
   TaskModel copyWith({
     String? title,
     DateTime? scheduledDate,
+    DateTime? completedAt,
     bool? isCompleted,
     int? categoryIndex,
     int? priorityIndex,
@@ -50,6 +53,7 @@ class TaskModel extends HiveObject {
       id: id,
       title: title ?? this.title,
       scheduledDate: scheduledDate ?? this.scheduledDate,
+      completedAt: completedAt ?? this.completedAt,
       isCompleted: isCompleted ?? this.isCompleted,
       categoryIndex: categoryIndex ?? this.categoryIndex,
       priorityIndex: priorityIndex ?? this.priorityIndex,
@@ -73,16 +77,16 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       title: fields[1] as String,
       scheduledDate: fields[2] as DateTime,
       isCompleted: fields[3] as bool,
-      categoryIndex: fields[4] as int? ?? 0, // Default to 0 if not present
-      priorityIndex:
-          fields[5] as int? ?? 1, // Default to 1 (Medium) if not present
+      categoryIndex: fields[4] as int? ?? 0,
+      priorityIndex: fields[5] as int? ?? 1,
+      completedAt: fields[6] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, TaskModel obj) {
     writer
-      ..writeByte(6) // Updated field count
+      ..writeByte(7) // Updated field count
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -94,7 +98,9 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(4)
       ..write(obj.categoryIndex)
       ..writeByte(5)
-      ..write(obj.priorityIndex);
+      ..write(obj.priorityIndex)
+      ..writeByte(6)
+      ..write(obj.completedAt);
   }
 
   @override

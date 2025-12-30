@@ -94,7 +94,11 @@ class TaskRepositoryImpl implements TaskRepository {
 
   @override
   Future<void> toggleTaskCompletion(Task task) async {
-    final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
+    final isCompleting = !task.isCompleted;
+    final updatedTask = task.copyWith(
+      isCompleted: isCompleting,
+      completedAt: isCompleting ? DateTime.now() : null,
+    );
     await updateTask(updatedTask);
 
     // Cancel notification if task is being completed
@@ -111,6 +115,7 @@ class TaskRepositoryImpl implements TaskRepository {
       isCompleted: model.isCompleted,
       category: model.category,
       priority: model.priority,
+      completedAt: model.completedAt,
     );
   }
 
@@ -122,6 +127,7 @@ class TaskRepositoryImpl implements TaskRepository {
       isCompleted: entity.isCompleted,
       categoryIndex: entity.category.index,
       priorityIndex: entity.priority.index,
+      completedAt: entity.completedAt,
     );
   }
 }

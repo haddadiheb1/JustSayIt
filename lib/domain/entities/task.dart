@@ -11,6 +11,7 @@ class Task with _$Task {
     required String id,
     required String title,
     required DateTime scheduledDate,
+    DateTime? completedAt,
     @Default(false) bool isCompleted,
     @Default(TaskCategory.defaultCategory) TaskCategory category,
     @Default(TaskPriority.medium) TaskPriority priority,
