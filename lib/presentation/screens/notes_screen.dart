@@ -6,11 +6,21 @@ import 'package:say_task/presentation/providers/note_provider.dart';
 import 'package:say_task/presentation/widgets/note_card.dart';
 import 'package:say_task/data/models/note_model.dart';
 
-class NotesScreen extends ConsumerWidget {
+class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotesScreen> createState() => _NotesScreenState();
+}
+
+class _NotesScreenState extends ConsumerState<NotesScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
     final notesAsync = ref.watch(noteListProvider);
 
     return Scaffold(

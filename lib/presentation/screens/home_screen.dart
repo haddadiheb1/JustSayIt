@@ -24,7 +24,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   String _capturedText = ""; // Store the captured text locally
 
   @override
@@ -137,7 +138,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final tasksAsync = ref.watch(taskListProvider);
 
     return Scaffold(

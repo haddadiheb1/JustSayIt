@@ -19,30 +19,43 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     SettingsScreen(),
   ];
 
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuart,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeInOut,
-        switchOutCurve: Curves.easeInOut,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.1, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          );
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // Disable swipe
+        children: _screens,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
         },
-        child: IndexedStack(
-          key: ValueKey<int>(_currentIndex),
-          index: _currentIndex,
-          children: _screens,
-        ),
       ),
       bottomNavigationBar: Container(
         height: 65,
@@ -87,11 +100,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final isSelected = _currentIndex == index;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
+      onTap: () => _onItemTapped(index),
       child: Container(
         width: 50,
         height: 50,

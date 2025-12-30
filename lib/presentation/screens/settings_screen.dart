@@ -12,7 +12,8 @@ class SettingsScreen extends ConsumerStatefulWidget {
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with AutomaticKeepAliveClientMixin {
   String _appVersion = '';
 
   @override
@@ -29,7 +30,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final themeMode = ref.watch(themeModeProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
 
