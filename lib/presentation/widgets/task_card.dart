@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,7 @@ class _TaskCardState extends ConsumerState<TaskCard>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
+  Timer? _overdueTimer;
 
   @override
   void initState() {
@@ -44,12 +46,41 @@ class _TaskCardState extends ConsumerState<TaskCard>
     Future.delayed(Duration(milliseconds: widget.index * 50), () {
       if (mounted) _controller.forward();
     });
+
+    _scheduleOverdueCheck();
   }
 
   @override
   void dispose() {
+    _overdueTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(TaskCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.task.scheduledDate != oldWidget.task.scheduledDate ||
+        widget.task.isCompleted != oldWidget.task.isCompleted) {
+      _scheduleOverdueCheck();
+    }
+  }
+
+  void _scheduleOverdueCheck() {
+    _overdueTimer?.cancel();
+
+    if (widget.task.isCompleted) return;
+
+    final now = DateTime.now();
+    final target = widget.task.scheduledDate;
+
+    if (target.isAfter(now)) {
+      final difference = target.difference(now);
+      // Add a small buffer to ensure the time has actually passed
+      _overdueTimer = Timer(difference + const Duration(seconds: 1), () {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   @override
