@@ -7,6 +7,7 @@ import 'package:say_task/presentation/providers/settings_provider.dart';
 import 'package:say_task/data/models/task_model.dart';
 import 'package:say_task/data/models/note_model.dart';
 import 'package:say_task/core/utils/notification_service.dart';
+import 'package:say_task/core/services/background_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,9 @@ void main() async {
   // Open boxes
   await Hive.openBox<TaskModel>('tasks');
   await Hive.openBox<NoteModel>('notes');
+
+  // Initialize Background Service (Alarms)
+  await BackgroundService.init();
 
   // Initialize Notifications
   final container = ProviderContainer();
