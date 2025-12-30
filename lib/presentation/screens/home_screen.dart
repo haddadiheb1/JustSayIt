@@ -98,9 +98,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       debugPrint('No text captured from speech');
       // Show a message to the user
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No speech detected. Please try again.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.mic_off_outlined, color: Colors.white),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text('No speech detected. Please try again.'),
+              ),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
