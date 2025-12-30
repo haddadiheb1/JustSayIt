@@ -105,13 +105,6 @@ class NotificationServiceImpl implements NotificationService {
 
     await _notificationsPlugin.initialize(initializationSettings);
     debugPrint('✅ Notification service ready');
-
-    // Test immediate notification
-    await showNotification(
-      id: 999,
-      title: '🔔 Notifications Active',
-      body: 'System is ready!',
-    );
   }
 
   @override

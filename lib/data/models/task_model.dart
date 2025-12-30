@@ -82,7 +82,7 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
   @override
   void write(BinaryWriter writer, TaskModel obj) {
     writer
-      ..writeByte(5) // Updated field count
+      ..writeByte(6) // Updated field count
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
