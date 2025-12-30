@@ -184,93 +184,124 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
 
           // Group tasks
+          final overdue = <Task>[];
           final today = <Task>[];
+          final tomorrow = <Task>[];
+          final nextWeek = <Task>[];
           final upcoming = <Task>[];
           final completed = <Task>[];
 
           final now = DateTime.now();
           final startOfToday = DateTime(now.year, now.month, now.day);
-          final endOfToday = startOfToday.add(const Duration(days: 1));
+          final startOfTomorrow = startOfToday.add(const Duration(days: 1));
+          final startOfNextWeek = startOfToday.add(const Duration(days: 2));
+          final startOfUpcoming = startOfToday.add(const Duration(days: 8));
 
           for (final t in tasks) {
             if (t.isCompleted) {
               completed.add(t);
-            } else if (t.scheduledDate.isBefore(endOfToday)) {
-              today.add(t);
             } else {
-              upcoming.add(t);
+              if (t.scheduledDate.isBefore(startOfToday)) {
+                overdue.add(t);
+              } else if (t.scheduledDate.isBefore(startOfTomorrow)) {
+                today.add(t);
+              } else if (t.scheduledDate.isBefore(startOfNextWeek)) {
+                tomorrow.add(t);
+              } else if (t.scheduledDate.isBefore(startOfUpcoming)) {
+                nextWeek.add(t);
+              } else {
+                upcoming.add(t);
+              }
             }
           }
 
           // Sort using priority logic
-          today.sort(_compareTasks);
-          upcoming.sort(_compareTasks);
-          // Completed tasks usually sorted by date completed, or just date?
-          // Let's keep date for completed, or priority too?
-          // Usually completed tasks are list history. Latest completed top?
-          // Assuming date for now, descending?
+          for (final list in [overdue, today, tomorrow, nextWeek, upcoming]) {
+            list.sort(_compareTasks);
+          }
           completed.sort((a, b) => b.scheduledDate.compareTo(a.scheduledDate));
+
+          Widget buildSection(String title, List<Task> tasks,
+              {Color? titleColor, IconData? icon}) {
+            if (tasks.isEmpty) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                  child: Row(
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon,
+                            size: 18, color: titleColor ?? Colors.grey[700]),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: titleColor ?? AppTheme.primaryBlue,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: (titleColor ?? AppTheme.primaryBlue)
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          tasks.length.toString(),
+                          style: TextStyle(
+                            color: titleColor ?? AppTheme.primaryBlue,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ImplicitlyAnimatedList<Task>(
+                  items: tasks,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  areItemsTheSame: (a, b) => a.id == b.id,
+                  itemBuilder: (context, animation, item, index) {
+                    return SizeFadeTransition(
+                      sizeFraction: 0.7,
+                      curve: Curves.easeInOut,
+                      animation: animation,
+                      child: TaskCard(task: item, index: index),
+                    );
+                  },
+                ),
+              ],
+            );
+          }
 
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 100),
             child: Column(
               children: [
-                if (today.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Today",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlue)),
-                    ),
-                  ),
-                  ImplicitlyAnimatedList<Task>(
-                    items: today,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    areItemsTheSame: (a, b) => a.id == b.id,
-                    itemBuilder: (context, animation, item, index) {
-                      return SizeFadeTransition(
-                        sizeFraction: 0.7,
-                        curve: Curves.easeInOut,
-                        animation: animation,
-                        child: TaskCard(task: item, index: index),
-                      );
-                    },
-                  ),
-                ],
-                if (upcoming.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Upcoming",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryBlue)),
-                    ),
-                  ),
-                  ImplicitlyAnimatedList<Task>(
-                    items: upcoming,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    areItemsTheSame: (a, b) => a.id == b.id,
-                    itemBuilder: (context, animation, item, index) {
-                      return SizeFadeTransition(
-                        sizeFraction: 0.7,
-                        curve: Curves.easeInOut,
-                        animation: animation,
-                        child: TaskCard(task: item, index: index),
-                      );
-                    },
-                  ),
-                ],
+                buildSection("Overdue", overdue,
+                    titleColor: AppTheme.errorRed,
+                    icon: Icons.warning_amber_rounded),
+                buildSection("Today", today,
+                    titleColor: AppTheme.primaryBlue, icon: Icons.today),
+                buildSection("Tomorrow", tomorrow,
+                    titleColor: Colors.orange, icon: Icons.event),
+                buildSection("Next 7 Days", nextWeek,
+                    titleColor: Colors.purple, icon: Icons.date_range),
+                buildSection("Upcoming", upcoming,
+                    titleColor: Colors.grey[700], icon: Icons.update),
                 if (completed.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
                     child: Row(
                       children: [
                         Container(
@@ -287,10 +318,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          "Completed (${completed.length})",
+                          "Completed",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[700],
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "(${completed.length})",
+                          style: TextStyle(
+                            color: Colors.grey[500],
                             fontSize: 16,
                           ),
                         ),
