@@ -110,18 +110,57 @@ class DateTimeParser {
       int hour = int.parse(hourStr!);
       int minute = int.parse(minuteStr);
 
-      if (meridiem == 'pm' && hour < 12) hour += 12;
-      if (meridiem == 'am' && hour == 12) hour = 0;
-
       final now = DateTime.now();
-      var potentialDate = DateTime(now.year, now.month, now.day, hour, minute);
 
-      // If time passed, assume tomorrow
-      if (potentialDate.isBefore(now)) {
-        potentialDate = potentialDate.add(const Duration(days: 1));
+      if (meridiem != null) {
+        // AM/PM specified
+        if (meridiem == 'pm' && hour < 12) hour += 12;
+        if (meridiem == 'am' && hour == 12) hour = 0;
+
+        var potentialDate =
+            DateTime(now.year, now.month, now.day, hour, minute);
+        // If time passed, assume tomorrow
+        if (potentialDate.isBefore(now)) {
+          potentialDate = potentialDate.add(const Duration(days: 1));
+        }
+        scheduledDate = potentialDate;
+      } else {
+        // Ambiguous time (no AM/PM)
+        // Try to infer intent: prefer "Today future" over "Today past"
+
+        // Option 1: Treat as 24h if > 12 (already covered by parsing)
+        // If hour <= 12, it could be AM or PM.
+
+        if (hour <= 12) {
+          // Construct AM and PM candidates
+          final hourAM = (hour == 12) ? 0 : hour;
+          final hourPM = (hour == 12) ? 12 : hour + 12;
+
+          final dateAM = DateTime(now.year, now.month, now.day, hourAM, minute);
+          final datePM = DateTime(now.year, now.month, now.day, hourPM, minute);
+
+          if (dateAM.isAfter(now)) {
+            // AM is in future, assume AM (closest future time)
+            scheduledDate = dateAM;
+          } else if (datePM.isAfter(now)) {
+            // AM is past, but PM is future (e.g. now 10am, input 2:00 -> 2pm)
+            // OR now 11pm, input 11:30 -> 11:30pm
+            scheduledDate = datePM;
+          } else {
+            // Both passed today, assume AM tomorrow (standard behavior)
+            scheduledDate = dateAM.add(const Duration(days: 1));
+          }
+        } else {
+          // 24h format (e.g. 13:00)
+          var potentialDate =
+              DateTime(now.year, now.month, now.day, hour, minute);
+          if (potentialDate.isBefore(now)) {
+            potentialDate = potentialDate.add(const Duration(days: 1));
+          }
+          scheduledDate = potentialDate;
+        }
       }
 
-      scheduledDate = potentialDate;
       cleanText = cleanText.replaceAll(match.group(0)!, '').trim();
     }
 

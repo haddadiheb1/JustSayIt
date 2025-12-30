@@ -11,10 +11,15 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 
 abstract class NotificationService {
   Future<void> init();
-  Future<void> scheduleTaskReminders({
+  Future<void> scheduleTask({
     required String taskId,
     required String taskTitle,
     required DateTime taskTime,
+  });
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
   });
   Future<void> cancelNotification(String taskId);
 }
@@ -25,46 +30,69 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<void> init() async {
-    debugPrint('🔔 Initializing notification service...');
-    tz.initializeTimeZones();
+    debugPrint('🔔 Initializing simple notification service...');
 
-    // Get and set the local timezone
+    // 1. Initialize Timezones
+    tz.initializeTimeZones();
     try {
       final dynamic localTimezone = await FlutterTimezone.getLocalTimezone();
       final String timeZoneName = localTimezone.toString();
 
-      debugPrint('🌍 Local timezone: $timeZoneName');
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
-    } catch (e) {
-      debugPrint('Could not get local timezone: $e');
-      // Fallback or leave default (UTC)
-    }
+      debugPrint('🌍 Raw timezone from system: $timeZoneName');
 
+      // Try to use the timezone directly
+      try {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+        debugPrint('✅ Successfully set timezone: $timeZoneName');
+      } catch (e) {
+        // If it fails, try to extract a valid IANA timezone
+        // For Tunisia/Central European Time, use Africa/Tunis
+        String fallbackZone = 'Africa/Tunis'; // Default for Tunisia (UTC+1)
+
+        if (timeZoneName.contains('Tunis') ||
+            timeZoneName.contains('Central European')) {
+          fallbackZone = 'Africa/Tunis';
+        } else if (timeZoneName.contains('Eastern European')) {
+          fallbackZone = 'Africa/Cairo';
+        } else if (timeZoneName.contains('Western European')) {
+          fallbackZone = 'Europe/Lisbon';
+        }
+
+        debugPrint(
+            '⚠️ Could not use system timezone, falling back to: $fallbackZone');
+        tz.setLocalLocation(tz.getLocation(fallbackZone));
+      }
+    } catch (e) {
+      debugPrint('❌ Timezone initialization failed: $e');
+      debugPrint('⚠️ Using UTC as last resort');
+    }
+    debugPrint('🕒 Timezone initialized: ${tz.local.name}');
+    debugPrint('🕒 Current Time (Local): ${tz.TZDateTime.now(tz.local)}');
+
+    // 2. Setup Android Settings
+    // Ensure you have 'app_icon' or '@mipmap/ic_launcher' in res/drawable
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
+    // 3. Initialize Plugin
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    // Request notification permissions for Android 13+
+    // Request permission (Android 13+)
     final androidImplementation =
         _notificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidImplementation != null) {
-      debugPrint('📱 Requesting notification permission...');
-      final granted =
-          await androidImplementation.requestNotificationsPermission();
-      debugPrint('📱 Notification permission granted: $granted');
+      await androidImplementation.requestNotificationsPermission();
+      await androidImplementation.requestExactAlarmsPermission();
     }
 
-    await _notificationsPlugin.initialize(initializationSettings);
-
-    // Create the channel explicitly
+    // Explicitly create the channel to force high importance
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'task_reminders', // id
       'Task Reminders', // title
-      description: 'Reminders for your tasks', // description
+      description: 'Simple reminders for your tasks', // description
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
@@ -75,102 +103,97 @@ class NotificationServiceImpl implements NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    debugPrint('✅ Notification service initialized');
+    await _notificationsPlugin.initialize(initializationSettings);
+    debugPrint('✅ Notification service ready');
+
+    // Test immediate notification
+    await showNotification(
+      id: 999,
+      title: '🔔 Notifications Active',
+      body: 'System is ready!',
+    );
   }
 
   @override
-  Future<void> scheduleTaskReminders({
+  Future<void> scheduleTask({
     required String taskId,
     required String taskTitle,
     required DateTime taskTime,
   }) async {
     final now = DateTime.now();
 
-    debugPrint('📅 Scheduling reminders for: $taskTitle');
-    debugPrint('   Task time: $taskTime');
-    debugPrint('   Current time: $now');
+    debugPrint('═══════════════════════════════════════════════════');
+    debugPrint('📋 SCHEDULE REQUEST for "$taskTitle"');
+    debugPrint('   Input DateTime: $taskTime');
+    debugPrint('   Current DateTime: $now');
+    debugPrint('   Timezone: ${tz.local.name}');
 
-    // Schedule notification 5 minutes BEFORE task time
-    final beforeTime = taskTime.subtract(const Duration(minutes: 5));
-    if (beforeTime.isAfter(now)) {
-      await _scheduleNotification(
-        id: '${taskId}_before',
-        title: '⏰ Task Starting Soon',
-        body: '$taskTitle starts in 5 minutes',
-        scheduledTime: beforeTime,
-      );
-      debugPrint('✅ Scheduled "before" reminder at: $beforeTime');
-    } else {
-      debugPrint('⚠️ Skipped "before" reminder (time is in the past)');
+    if (taskTime.isBefore(now)) {
+      debugPrint('   ⚠️ SKIPPED: Task is in the past');
+      debugPrint('═══════════════════════════════════════════════════');
+      return;
     }
 
-    // Schedule notification 5 minutes AFTER task time (overdue reminder)
-    final afterTime = taskTime.add(const Duration(minutes: 5));
-    if (afterTime.isAfter(now)) {
-      await _scheduleNotification(
-        id: '${taskId}_after',
-        title: '⚠️ Task Overdue',
-        body: '$taskTitle is overdue. Check your tasks!',
-        scheduledTime: afterTime,
-      );
-      debugPrint('✅ Scheduled "after" reminder at: $afterTime');
-    } else {
-      debugPrint('⚠️ Skipped "after" reminder (time is in the past)');
-    }
+    final notificationId = taskId.hashCode.abs();
+    final scheduledDate = tz.TZDateTime.from(taskTime, tz.local);
+    final tzNow = tz.TZDateTime.now(tz.local);
+
+    debugPrint('   Scheduled TZ DateTime: $scheduledDate');
+    debugPrint('   Current TZ DateTime: $tzNow');
+    debugPrint(
+        '   Time until notification: ${scheduledDate.difference(tzNow)}');
+    debugPrint('   Notification ID: $notificationId');
+
+    await _notificationsPlugin.zonedSchedule(
+      notificationId,
+      '📝 Task Reminder',
+      taskTitle,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Simple reminders for your tasks',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+
+    debugPrint('   ✅ SCHEDULED SUCCESSFULLY');
+    debugPrint('═══════════════════════════════════════════════════');
   }
 
-  Future<void> _scheduleNotification({
-    required String id,
+  @override
+  Future<void> showNotification({
+    required int id,
     required String title,
     required String body,
-    required DateTime scheduledTime,
   }) async {
-    try {
-      final notificationId = id.hashCode.abs();
-      // Use tz.local which is now correctly set
-      final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
-
-      debugPrint('   Scheduling notification ID: $notificationId');
-      debugPrint('   TZ Scheduled time: $tzScheduledTime');
-      debugPrint(
-          '   Time until notification: ${tzScheduledTime.difference(tz.TZDateTime.now(tz.local))}');
-
-      await _notificationsPlugin.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        tzScheduledTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'task_reminders',
-            'Task Reminders',
-            channelDescription: 'Reminders for your tasks',
-            importance: Importance.max,
-            priority: Priority.high,
-            enableVibration: true,
-            playSound: true,
-          ),
+    debugPrint('🚀 Showing immediate notification: $title');
+    await _notificationsPlugin.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'task_reminders',
+          'Task Reminders',
+          channelDescription: 'Simple reminders for your tasks',
+          importance: Importance.max,
+          priority: Priority.high,
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-
-      debugPrint('   ✅ Notification scheduled successfully');
-    } catch (e) {
-      debugPrint('   ❌ Error scheduling notification: $e');
-    }
+      ),
+    );
   }
 
   @override
   Future<void> cancelNotification(String taskId) async {
-    // Cancel both before and after notifications
-    final beforeId = '${taskId}_before'.hashCode.abs();
-    final afterId = '${taskId}_after'.hashCode.abs();
-
-    await _notificationsPlugin.cancel(beforeId);
-    await _notificationsPlugin.cancel(afterId);
-
-    debugPrint('🔕 Cancelled notifications for task ID: $taskId');
+    final notificationId = taskId.hashCode.abs();
+    await _notificationsPlugin.cancel(notificationId);
+    debugPrint('🔕 Cancelled notification (ID: $notificationId)');
   }
 }

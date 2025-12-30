@@ -5,6 +5,7 @@ import 'package:say_task/domain/entities/task_category.dart';
 import 'package:say_task/domain/repositories/task_repository.dart';
 import 'package:say_task/core/utils/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Provider
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
@@ -45,12 +46,18 @@ class TaskRepositoryImpl implements TaskRepository {
     );
     await _dataSource.addTask(model);
 
-    // Schedule reminders (10 min before and 10 min after)
-    await _notificationService.scheduleTaskReminders(
-      taskId: model.id,
-      taskTitle: model.title,
-      taskTime: model.scheduledDate,
-    );
+    // Check if notifications are enabled
+    final prefs = await SharedPreferences.getInstance();
+    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+
+    if (notificationsEnabled) {
+      // Schedule notification
+      await _notificationService.scheduleTask(
+        taskId: model.id,
+        taskTitle: model.title,
+        taskTime: model.scheduledDate,
+      );
+    }
   }
 
   @override
@@ -71,11 +78,17 @@ class TaskRepositoryImpl implements TaskRepository {
 
     // Only reschedule if task is not completed
     if (!task.isCompleted) {
-      await _notificationService.scheduleTaskReminders(
-        taskId: task.id,
-        taskTitle: task.title,
-        taskTime: task.scheduledDate,
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final notificationsEnabled =
+          prefs.getBool('notificationsEnabled') ?? true;
+
+      if (notificationsEnabled) {
+        await _notificationService.scheduleTask(
+          taskId: task.id,
+          taskTitle: task.title,
+          taskTime: task.scheduledDate,
+        );
+      }
     }
   }
 

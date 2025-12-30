@@ -6,6 +6,7 @@ import 'package:say_task/presentation/screens/main_navigation_screen.dart';
 import 'package:say_task/presentation/providers/settings_provider.dart';
 import 'package:say_task/data/models/task_model.dart';
 import 'package:say_task/data/models/note_model.dart';
+import 'package:say_task/core/utils/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,17 @@ void main() async {
   await Hive.openBox<TaskModel>('tasks');
   await Hive.openBox<NoteModel>('notes');
 
-  runApp(const ProviderScope(child: VoiceTaskApp()));
+  // Initialize Notifications
+  final container = ProviderContainer();
+  final notificationService = container.read(notificationServiceProvider);
+  await notificationService.init();
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const VoiceTaskApp(),
+    ),
+  );
 }
 
 class VoiceTaskApp extends ConsumerWidget {
