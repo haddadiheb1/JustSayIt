@@ -10,7 +10,7 @@ class AppTheme {
   // 🌫️ NEUTRAL PALETTE (UI Foundation) - Light Mode
   static const Color backgroundLight = Color(0xFFF9FAFB); // Off White
   static const Color surfaceLight = Color(0xFFFFFFFF); // White
-  static const Color cardLight = Color(0xFFF1F5F9); // Light Gray
+  static const Color cardLight = Color(0xFFFFFFFF); // White cards
   static const Color textPrimary = Color(0xFF0F172A); // Almost Black
   static const Color textSecondary = Color(0xFF64748B); // Cool Gray
   static const Color divider = Color(0xFFE5E7EB); // Subtle Gray
@@ -108,7 +108,7 @@ class AppTheme {
         elevation: 4,
       ),
       cardTheme: CardThemeData(
-        color: surfaceLight,
+        color: cardLight,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

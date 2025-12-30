@@ -21,6 +21,7 @@ mixin _$Note {
   String get content => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  bool get isPinned => throw _privateConstructorUsedError;
 
   /// Create a copy of Note
   /// with the given fields replaced by the non-null parameter values.
@@ -38,7 +39,8 @@ abstract class $NoteCopyWith<$Res> {
       String title,
       String content,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      bool isPinned});
 }
 
 /// @nodoc
@@ -61,6 +63,7 @@ class _$NoteCopyWithImpl<$Res, $Val extends Note>
     Object? content = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isPinned = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -83,6 +86,10 @@ class _$NoteCopyWithImpl<$Res, $Val extends Note>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isPinned: null == isPinned
+          ? _value.isPinned
+          : isPinned // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -99,7 +106,8 @@ abstract class _$$NoteImplCopyWith<$Res> implements $NoteCopyWith<$Res> {
       String title,
       String content,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      bool isPinned});
 }
 
 /// @nodoc
@@ -119,6 +127,7 @@ class __$$NoteImplCopyWithImpl<$Res>
     Object? content = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isPinned = null,
   }) {
     return _then(_$NoteImpl(
       id: null == id
@@ -141,6 +150,10 @@ class __$$NoteImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isPinned: null == isPinned
+          ? _value.isPinned
+          : isPinned // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -153,7 +166,8 @@ class _$NoteImpl implements _Note {
       required this.title,
       required this.content,
       required this.createdAt,
-      required this.updatedAt});
+      required this.updatedAt,
+      this.isPinned = false});
 
   @override
   final String id;
@@ -165,10 +179,13 @@ class _$NoteImpl implements _Note {
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
+  @override
+  @JsonKey()
+  final bool isPinned;
 
   @override
   String toString() {
-    return 'Note(id: $id, title: $title, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Note(id: $id, title: $title, content: $content, createdAt: $createdAt, updatedAt: $updatedAt, isPinned: $isPinned)';
   }
 
   @override
@@ -182,12 +199,14 @@ class _$NoteImpl implements _Note {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.isPinned, isPinned) ||
+                other.isPinned == isPinned));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, content, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, id, title, content, createdAt, updatedAt, isPinned);
 
   /// Create a copy of Note
   /// with the given fields replaced by the non-null parameter values.
@@ -204,7 +223,8 @@ abstract class _Note implements Note {
       required final String title,
       required final String content,
       required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$NoteImpl;
+      required final DateTime updatedAt,
+      final bool isPinned}) = _$NoteImpl;
 
   @override
   String get id;
@@ -216,6 +236,8 @@ abstract class _Note implements Note {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
+  @override
+  bool get isPinned;
 
   /// Create a copy of Note
   /// with the given fields replaced by the non-null parameter values.

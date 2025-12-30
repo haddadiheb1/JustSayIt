@@ -596,7 +596,7 @@ final initializeAppProvider = AutoDisposeFutureProvider<void>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef InitializeAppRef = AutoDisposeFutureProviderRef<void>;
-String _$taskListHash() => r'b7c43add9313d94e18ea57f8538763a2e0160ae7';
+String _$taskListHash() => r'f616151c60cb81ff3e25a2846af8cbdd74af625b';
 
 /// See also [TaskList].
 @ProviderFor(TaskList)

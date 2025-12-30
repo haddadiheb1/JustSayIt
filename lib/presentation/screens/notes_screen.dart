@@ -4,6 +4,7 @@ import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/presentation/screens/note_editor_screen.dart';
 import 'package:say_task/presentation/providers/note_provider.dart';
 import 'package:say_task/presentation/widgets/note_card.dart';
+import 'package:say_task/data/models/note_model.dart';
 
 class NotesScreen extends ConsumerWidget {
   const NotesScreen({super.key});
@@ -53,11 +54,20 @@ class NotesScreen extends ConsumerWidget {
             );
           }
 
+          // Sort notes: Pinned first, then by date descending (newest first)
+          final sortedNotes = List<NoteModel>.from(notes)
+            ..sort((a, b) {
+              if (a.isPinned != b.isPinned) {
+                return a.isPinned ? -1 : 1;
+              }
+              return b.createdAt.compareTo(a.createdAt);
+            });
+
           return ListView.builder(
             padding: const EdgeInsets.only(top: 8, bottom: 80),
-            itemCount: notes.length,
+            itemCount: sortedNotes.length,
             itemBuilder: (context, index) {
-              final note = notes[notes.length - 1 - index]; // Reverse order
+              final note = sortedNotes[index];
               return NoteCard(
                 note: note,
                 onTap: () {
@@ -70,6 +80,10 @@ class NotesScreen extends ConsumerWidget {
                 },
                 onDelete: () {
                   ref.read(deleteNoteProvider(note.id));
+                },
+                onPin: () {
+                  final updatedNote = note.copyWith(isPinned: !note.isPinned);
+                  ref.read(updateNoteProvider(updatedNote));
                 },
               );
             },

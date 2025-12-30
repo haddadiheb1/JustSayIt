@@ -10,6 +10,7 @@ class Note with _$Note {
     required String content,
     required DateTime createdAt,
     required DateTime updatedAt,
+    @Default(false) bool isPinned,
   }) = _Note;
 
   factory Note.create({
@@ -28,6 +29,7 @@ class Note with _$Note {
       content: content,
       createdAt: now,
       updatedAt: now,
+      isPinned: false,
     );
   }
 }

@@ -7,6 +7,7 @@ class NoteModel extends HiveObject {
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<String> images;
+  final bool isPinned;
 
   NoteModel({
     required this.id,
@@ -15,12 +16,14 @@ class NoteModel extends HiveObject {
     required this.createdAt,
     required this.updatedAt,
     this.images = const [],
+    this.isPinned = false,
   });
 
   factory NoteModel.create(
       {required String content,
       String title = '',
-      List<String> images = const []}) {
+      List<String> images = const [],
+      bool isPinned = false}) {
     final now = DateTime.now();
     // Use provided title or fallback to extracting from content
     final finalTitle = title.isNotEmpty
@@ -34,6 +37,7 @@ class NoteModel extends HiveObject {
       createdAt: now,
       updatedAt: now,
       images: images,
+      isPinned: isPinned,
     );
   }
 
@@ -42,6 +46,7 @@ class NoteModel extends HiveObject {
     String? content,
     List<String>? images,
     DateTime? updatedAt,
+    bool? isPinned,
   }) {
     return NoteModel(
       id: id,
@@ -50,6 +55,7 @@ class NoteModel extends HiveObject {
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       images: images ?? this.images,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 }
@@ -60,14 +66,30 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
   final int typeId = 1;
 
   @override
+  @override
   NoteModel read(BinaryReader reader) {
+    final id = reader.readString();
+    final title = reader.readString();
+    final content = reader.readString();
+    final createdAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    final updatedAt = DateTime.fromMillisecondsSinceEpoch(reader.readInt());
+    final images = (reader.readList()).cast<String>();
+
+    bool isPinned = false;
+    try {
+      isPinned = reader.readBool();
+    } catch (e) {
+      // Legacy data might not have isPinned
+    }
+
     return NoteModel(
-      id: reader.readString(),
-      title: reader.readString(),
-      content: reader.readString(),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(reader.readInt()),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(reader.readInt()),
-      images: (reader.readList()).cast<String>(),
+      id: id,
+      title: title,
+      content: content,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      images: images,
+      isPinned: isPinned,
     );
   }
 
@@ -79,5 +101,6 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
     writer.writeInt(obj.createdAt.millisecondsSinceEpoch);
     writer.writeInt(obj.updatedAt.millisecondsSinceEpoch);
     writer.writeList(obj.images);
+    writer.writeBool(obj.isPinned);
   }
 }

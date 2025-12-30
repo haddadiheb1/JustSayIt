@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/data/models/note_model.dart';
 import 'package:intl/intl.dart';
 
@@ -8,12 +9,14 @@ class NoteCard extends StatelessWidget {
   final NoteModel note;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final VoidCallback? onPin;
 
   const NoteCard({
     super.key,
     required this.note,
     this.onTap,
     this.onDelete,
+    this.onPin,
   });
 
   @override
@@ -35,11 +38,13 @@ class NoteCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(
             horizontal: 16, vertical: 8), // Restore margins for list look
-        elevation: 0,
-        color: const Color(0xFF252525), // Dark grey card background
+        elevation: Theme.of(context).brightness == Brightness.light ? 2 : 0,
+        color: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide.none,
+          side: Theme.of(context).brightness == Brightness.light
+              ? BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1)
+              : BorderSide.none,
         ),
         child: InkWell(
           onTap: onTap,
@@ -61,7 +66,9 @@ class NoteCard extends StatelessWidget {
                         return Container(
                           height: 80,
                           width: 80,
-                          color: Colors.grey[800],
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           alignment: Alignment.center,
                           child: const Icon(Icons.broken_image,
                               color: Colors.white54, size: 20),
@@ -77,10 +84,10 @@ class NoteCard extends StatelessWidget {
                     children: [
                       Text(
                         note.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -90,9 +97,12 @@ class NoteCard extends StatelessWidget {
                         Text(
                           note.content.replaceAll(
                               '\n', ' '), // flattening content preview
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFFB0BEC5), // Light grey text
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
                             height: 1.4,
                           ),
                           maxLines: 2,
@@ -100,12 +110,33 @@ class NoteCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                       ],
-                      Text(
-                        _formatDate(note.updatedAt),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF757575), // Darker grey date
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _formatDate(note.updatedAt),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ),
+                          if (onPin != null)
+                            GestureDetector(
+                                onTap: onPin,
+                                child: Icon(
+                                  note.isPinned
+                                      ? Icons.push_pin
+                                      : Icons.push_pin_outlined,
+                                  size: 20,
+                                  color: note.isPinned
+                                      ? AppTheme.primaryBlue
+                                      : Colors.grey,
+                                ))
+                        ],
                       ),
                     ],
                   ),
