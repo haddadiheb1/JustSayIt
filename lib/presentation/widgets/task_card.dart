@@ -237,7 +237,7 @@ class _TaskCardState extends ConsumerState<TaskCard>
                               ),
                               child: Text(widget.task.title),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 8),
                             Row(
                               children: [
                                 Icon(
@@ -288,6 +288,38 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                     ),
                                   ),
                                 ],
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Color(widget.task.category.colorValue)
+                                            .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        widget.task.category.icon,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        widget.task.category.displayName,
+                                        style: TextStyle(
+                                          color: Color(
+                                              widget.task.category.colorValue),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ],
