@@ -6,7 +6,6 @@ import 'package:say_task/presentation/providers/task_provider.dart';
 import 'package:say_task/domain/entities/task_category.dart';
 import 'package:intl/intl.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -18,9 +17,9 @@ class StatsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Your Progress',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -37,7 +36,7 @@ class StatsScreen extends ConsumerWidget {
                   const Gap(16),
                   Text(
                     'No tasks yet. Start working!',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey,
                     ),
@@ -153,7 +152,7 @@ class StatsScreen extends ConsumerWidget {
 
                   // Weekly Chart
                   Text("Weekly Activity",
-                      style: GoogleFonts.outfit(
+                      style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                   const Gap(16),
                   Container(
@@ -196,7 +195,7 @@ class StatsScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Text(
                                     weeklyData[value.toInt()]['day'] as String,
-                                    style: GoogleFonts.outfit(
+                                    style: const TextStyle(
                                       color: Colors.grey,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -242,7 +241,7 @@ class StatsScreen extends ConsumerWidget {
                   // Category Breakdown
                   if (topCategories.isNotEmpty) ...[
                     Text("Top Categories",
-                        style: GoogleFonts.outfit(
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     const Gap(16),
                     ...topCategories.map((entry) {
@@ -301,7 +300,7 @@ class StatsScreen extends ConsumerWidget {
         children: [
           Text(
             "Today",
-            style: GoogleFonts.outfit(
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -310,15 +309,15 @@ class StatsScreen extends ConsumerWidget {
           const Gap(4),
           Text(
             "$count",
-            style: GoogleFonts.outfit(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
+          const Text(
             "Tasks done",
-            style: GoogleFonts.outfit(
+            style: TextStyle(
               color: Colors.white70,
               fontSize: 12,
             ),
@@ -330,9 +329,9 @@ class StatsScreen extends ConsumerWidget {
 
   Widget _buildCompletionRateCard(
       BuildContext context, double rate, bool isDark) {
+    final percentage = (rate * 100).toInt();
     return Container(
       padding: const EdgeInsets.all(20),
-      // Same decoration as Today card
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppTheme.primaryIndigo, const Color(0xFF818CF8)],
@@ -348,62 +347,32 @@ class StatsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 60,
-            width: 60,
-            child: Stack(
-              children: [
-                Center(
-                  child: CircularProgressIndicator(
-                    value: rate,
-                    strokeWidth: 8,
-                    // White track with transparency
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    color: Colors.white,
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-                Center(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      "${(rate * 100).toInt()}%",
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.white, // White text
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            "Rate",
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const Gap(16),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Rate",
-                  style: GoogleFonts.outfit(
-                    color: Colors.white70, // White70 text
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  "Done",
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white, // White text
-                  ),
-                ),
-              ],
+          const Gap(4),
+          Text(
+            "$percentage%",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Text(
+            "Done",
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
             ),
           ),
         ],
@@ -442,14 +411,14 @@ class StatsScreen extends ConsumerWidget {
                   children: [
                     Text(
                       category.displayName,
-                      style: GoogleFonts.outfit(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
                     ),
                     Text(
                       "$count tasks",
-                      style: GoogleFonts.outfit(
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -566,7 +535,7 @@ class StatsScreen extends ConsumerWidget {
               children: [
                 Text(
                   "Most Productive Hour",
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
                     fontWeight: FontWeight.w500,
@@ -575,7 +544,7 @@ class StatsScreen extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   timeText,
-                  style: GoogleFonts.outfit(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSurface,

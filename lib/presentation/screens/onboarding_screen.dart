@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/presentation/screens/main_navigation_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -96,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   child: Text(
                     _currentPage == 0 ? "Next" : "Start speaking",
-                    style: GoogleFonts.outfit(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -153,10 +152,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             "Turn your thoughts\ninto tasks",
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF2D3748), // Dark Gray for text
+              color: Color(0xFF2D3748), // Dark Gray for text
               height: 1.2,
             ),
           ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
@@ -164,11 +163,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const Gap(16),
 
           Text(
-            "Just speak. We’ll help you organize everything.",
+            "Just speak. We'll help you organize everything.",
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: const TextStyle(
               fontSize: 18,
-              color: const Color(0xFF718096), // Medium Gray
+              color: Color(0xFF718096), // Medium Gray
               height: 1.5,
             ),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
@@ -185,10 +184,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Text(
             "How it works",
-            style: GoogleFonts.outfit(
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF2D3748),
+              color: Color(0xFF2D3748),
             ),
           ).animate().fadeIn().slideY(begin: -0.2),
           const Gap(48),
@@ -245,18 +244,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF2D3748),
+                  color: Color(0xFF2D3748),
                 ),
               ),
               const Gap(4),
               Text(
                 subtitle,
-                style: GoogleFonts.outfit(
+                style: const TextStyle(
                   fontSize: 14,
-                  color: const Color(0xFF718096),
+                  color: Color(0xFF718096),
                 ),
               ),
             ],

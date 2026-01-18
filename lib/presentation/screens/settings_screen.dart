@@ -38,6 +38,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final themeMode = ref.watch(themeModeProvider);
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
 
+    // Calculate bottom padding for floating navigation bar
+    // Navigation bar height (80) + margin bottom (24) + extra spacing (16)
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 120.0;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -51,7 +55,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding),
         children: [
           // Appearance Section
           _buildSectionHeader('Appearance'),
