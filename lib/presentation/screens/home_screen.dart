@@ -4,18 +4,10 @@ import 'package:gap/gap.dart';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:say_task/core/theme/app_theme.dart';
-import 'package:say_task/core/utils/date_parser.dart';
-import 'package:say_task/core/utils/notification_service.dart';
-import 'package:say_task/core/utils/speech_service.dart';
 import 'package:say_task/domain/entities/task.dart';
-import 'package:say_task/presentation/providers/speech_provider.dart';
 import 'package:say_task/presentation/providers/task_provider.dart';
-import 'package:say_task/presentation/widgets/mic_button.dart';
 import 'package:say_task/presentation/widgets/task_card.dart';
-import 'package:say_task/presentation/widgets/task_confirm_sheet.dart';
-import 'package:say_task/presentation/widgets/voice_capture_sheet.dart';
 import 'package:say_task/presentation/screens/manual_task_entry_screen.dart';
-import 'package:say_task/presentation/screens/stats_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -26,121 +18,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with AutomaticKeepAliveClientMixin {
-  String _capturedText = ""; // Store the captured text locally
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize services - must await the app initialization
-    Future.microtask(() async {
-      await ref.read(initializeAppProvider.future);
-      ref.read(notificationServiceProvider).init();
-      ref.read(speechServiceProvider).init();
-    });
-  }
-
-  void _startListening() async {
-    final speechService = ref.read(speechServiceProvider);
-    final notifier = ref.read(speechStateProvider.notifier);
-    final isListeningNotifier = ref.read(listeningStateProvider.notifier);
-
-    // Reset captured text
-    _capturedText = "";
-
-    // Show listening sheet
-    showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      backgroundColor: Colors.transparent,
-      builder: (_) => VoiceCaptureSheet(
-        onStop: () => _stopListening(),
-      ),
-    );
-
-    isListeningNotifier.setListening(true);
-    notifier.update("");
-
-    debugPrint('Starting speech recognition...');
-    await speechService.startListening(
-      onResult: (text) {
-        debugPrint('Speech result received: "$text"');
-        _capturedText = text; // Store in local variable
-        notifier.update(text); // Also update provider for UI
-      },
-      onSoundLevelChange: (level) {
-        ref.read(speechLevelProvider.notifier).update(level);
-      },
-    );
-    debugPrint('Speech recognition started');
-  }
-
-  void _stopListening() async {
-    final speechService = ref.read(speechServiceProvider);
-
-    // Stop the speech service
-    await speechService.stopListening();
-
-    // Give a small delay to ensure final result is captured
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    if (!mounted) return;
-
-    // Close listening sheet
-    Navigator.of(context).pop();
-    ref.read(listeningStateProvider.notifier).setListening(false);
-
-    debugPrint('Captured text from local variable: "$_capturedText"');
-
-    if (_capturedText.isNotEmpty) {
-      _processVoiceCommand(_capturedText);
-    } else {
-      debugPrint('No text captured from speech');
-      // Show a message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.mic_off_outlined, color: Colors.white),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text('No speech detected. Please try again.'),
-              ),
-            ],
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _processVoiceCommand(String text) {
-    debugPrint('Processing voice command: "$text"');
-    final result = DateTimeParser.parse(text);
-    debugPrint(
-        'Parser result - title: "${result.title}", dateTime: ${result.dateTime}');
-
-    if (result.dateTime == null) {
-      debugPrint('Warning: dateTime is null, using current time');
-    }
-
-    debugPrint('Showing task confirmation sheet...');
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => TaskConfirmSheet(
-        initialTitle: result.title,
-        initialDate: result.dateTime ?? DateTime.now(),
-      ),
-    );
-  }
-
   int _compareTasks(Task a, Task b) {
     // 1. Sort by Priority (Descending: High > Medium > Low)
     // High=2, Medium=1, Low=0. So b.compare(a) gives Descending.
@@ -185,19 +62,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               color: Theme.of(context).colorScheme.primary,
             ),
             tooltip: 'Add task manually',
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StatsScreen()),
-              );
-            },
-            icon: Icon(
-              Icons.bar_chart_rounded,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            tooltip: 'View Stats',
           ),
           const SizedBox(width: 8),
         ],
@@ -396,11 +260,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text("Error: $err")),
       ),
-      floatingActionButton: MicButton(
-        isListening: ref.watch(listeningStateProvider),
-        onPressed: _startListening,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

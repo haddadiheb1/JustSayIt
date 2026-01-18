@@ -27,93 +27,103 @@ class _NotesScreenState extends ConsumerState<NotesScreen>
       appBar: AppBar(
         title: const Text('Notes'),
       ),
-      body: notesAsync.when(
-        data: (notes) {
-          if (notes.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.note_outlined,
-                    size: 80,
-                    color: AppTheme.textSecondary,
+      body: Stack(
+        children: [
+          notesAsync.when(
+            data: (notes) {
+              if (notes.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.note_outlined,
+                        size: 80,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No notes yet',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Capture ideas fast',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'No notes yet',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Capture ideas fast',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Sort notes: Pinned first, then by date descending (newest first)
-          final sortedNotes = List<NoteModel>.from(notes)
-            ..sort((a, b) {
-              if (a.isPinned != b.isPinned) {
-                return a.isPinned ? -1 : 1;
+                );
               }
-              return b.createdAt.compareTo(a.createdAt);
-            });
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(top: 8, bottom: 80),
-            itemCount: sortedNotes.length,
-            itemBuilder: (context, index) {
-              final note = sortedNotes[index];
-              return NoteCard(
-                note: note,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NoteEditorScreen(note: note),
-                    ),
+              // Sort notes: Pinned first, then by date descending (newest first)
+              final sortedNotes = List<NoteModel>.from(notes)
+                ..sort((a, b) {
+                  if (a.isPinned != b.isPinned) {
+                    return a.isPinned ? -1 : 1;
+                  }
+                  return b.createdAt.compareTo(a.createdAt);
+                });
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(
+                    top: 8, bottom: 120), // Increased bottom padding
+                itemCount: sortedNotes.length,
+                itemBuilder: (context, index) {
+                  final note = sortedNotes[index];
+                  return NoteCard(
+                    note: note,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NoteEditorScreen(note: note),
+                        ),
+                      );
+                    },
+                    onDelete: () {
+                      ref.read(deleteNoteProvider(note.id));
+                    },
+                    onPin: () {
+                      final updatedNote =
+                          note.copyWith(isPinned: !note.isPinned);
+                      ref.read(updateNoteProvider(updatedNote));
+                    },
                   );
-                },
-                onDelete: () {
-                  ref.read(deleteNoteProvider(note.id));
-                },
-                onPin: () {
-                  final updatedNote = note.copyWith(isPinned: !note.isPinned);
-                  ref.read(updateNoteProvider(updatedNote));
                 },
               );
             },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error'),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NoteEditorScreen(),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Text('Error: $error'),
             ),
-          );
-        },
-        child: const Icon(Icons.add),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 110, // Position above the 80px navbar + margin
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NoteEditorScreen(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }
