@@ -1,4 +1,31 @@
 class DateTimeParser {
+  static const _months = {
+    'jan': 1,
+    'january': 1,
+    'feb': 2,
+    'february': 2,
+    'mar': 3,
+    'march': 3,
+    'apr': 4,
+    'april': 4,
+    'may': 5,
+    'jun': 6,
+    'june': 6,
+    'jul': 7,
+    'july': 7,
+    'aug': 8,
+    'august': 8,
+    'sep': 9,
+    'september': 9,
+    'sept': 9,
+    'oct': 10,
+    'october': 10,
+    'nov': 11,
+    'november': 11,
+    'dec': 12,
+    'december': 12,
+  };
+
   /// Parses natural language string to extract date and time.
   /// Returns a tuple of [Title, ScheduledDate].
   /// If no date/time found, defaults to Task Default (e.g., now or null).
@@ -9,8 +36,6 @@ class DateTimeParser {
     // 1. Check for specific keywords
     final lower = cleanText.toLowerCase();
 
-    // Simple rule-based parsing
-
     // Context-aware time phrases (Natural Language Boost)
     final contextualPhrases = {
       // Time of day
@@ -18,10 +43,6 @@ class DateTimeParser {
       'this evening': (daysToAdd: 0, hour: 18, minute: 0),
       'this afternoon': (daysToAdd: 0, hour: 14, minute: 0),
       'this morning': (daysToAdd: 0, hour: 9, minute: 0),
-      'after lunch': (daysToAdd: 0, hour: 13, minute: 30),
-      'after dinner': (daysToAdd: 0, hour: 20, minute: 0),
-      'before lunch': (daysToAdd: 0, hour: 11, minute: 30),
-
       // Tomorrow variants
       'tomorrow morning': (daysToAdd: 1, hour: 9, minute: 0),
       'tomorrow afternoon': (daysToAdd: 1, hour: 14, minute: 0),
@@ -30,6 +51,7 @@ class DateTimeParser {
     };
 
     // Check for contextual phrases first
+    bool contextualDateFound = false;
     for (final entry in contextualPhrases.entries) {
       if (lower.contains(entry.key)) {
         final now = DateTime.now();
@@ -48,39 +70,89 @@ class DateTimeParser {
 
         scheduledDate = dateTime;
         cleanText = _removeKeyword(cleanText, entry.key);
+        contextualDateFound = true;
         break;
       }
     }
 
-    // "Tomorrow" (only if not already matched by contextual phrases)
+    // 2. Explicit Date Parsing (e.g., "15 March", "Oct 3rd")
+    // Only look for explicit dates if we haven't found a contextual one (like "tomorrow")
+    // OR if we want to support "Tomorrow" overriding. But usually "15 March" is specific.
+    if (!contextualDateFound) {
+      // RegExp for "15 March" or "15th March"
+      // Group 1: Day, Group 3: Month
+      final dayMonthRegex = RegExp(
+        r'\b(\d{1,2})(?:st|nd|rd|th)?\s+(of\s+)?([a-z]+)\b',
+        caseSensitive: false,
+      );
+
+      // RegExp for "March 15" or "March 15th"
+      // Group 1: Month, Group 2: Day
+      final monthDayRegex = RegExp(
+        r'\b([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?\b',
+        caseSensitive: false,
+      );
+
+      Match? dateMatch = dayMonthRegex.firstMatch(cleanText);
+      String? monthStr;
+      String? dayStr;
+      String fullMatch = '';
+
+      if (dateMatch != null) {
+        dayStr = dateMatch.group(1);
+        monthStr = dateMatch.group(3);
+        fullMatch = dateMatch.group(0)!;
+      } else {
+        dateMatch = monthDayRegex.firstMatch(cleanText);
+        if (dateMatch != null) {
+          monthStr = dateMatch.group(1);
+          dayStr = dateMatch.group(2);
+          fullMatch = dateMatch.group(0)!;
+        }
+      }
+
+      if (dayStr != null && monthStr != null) {
+        final monthIndex = _months[monthStr.toLowerCase()];
+        if (monthIndex != null) {
+          final now = DateTime.now();
+          final day = int.parse(dayStr);
+
+          // Smart Year Inference
+          // Attempt current year
+          var parsedDate = DateTime(now.year, monthIndex, day);
+
+          // If date is in the past (e.g. said "15 March" on Dec 15), assume next year
+          // We assume "past" means strictly before today (ignoring time for now)
+          if (parsedDate.isBefore(DateTime(now.year, now.month, now.day))) {
+            parsedDate = DateTime(now.year + 1, monthIndex, day);
+          }
+
+          scheduledDate = parsedDate;
+          cleanText = cleanText.replaceAll(fullMatch, '').trim();
+        }
+      }
+    }
+
+    // 3. Fallback Contextual Keywords
     if (scheduledDate == null && lower.contains('tomorrow')) {
       scheduledDate = _getDate(daysToAdd: 1);
       cleanText = _removeKeyword(cleanText, 'tomorrow');
-    }
-    // "Today"
-    else if (scheduledDate == null && lower.contains('today')) {
+    } else if (scheduledDate == null && lower.contains('today')) {
       scheduledDate = _getDate(daysToAdd: 0);
       cleanText = _removeKeyword(cleanText, 'today');
-    }
-    // "Next week"
-    else if (lower.contains('next week')) {
+    } else if (scheduledDate == null && lower.contains('next week')) {
       scheduledDate = _getDate(daysToAdd: 7);
       cleanText = _removeKeyword(cleanText, 'next week');
     }
 
-    // 2. Extract Time (e.g., "at 5 pm", "18:00", "8 p.m", "5:30am")
-    // Improved regex to handle: "at 8 pm", "8 p.m", "8pm", "5:30 a.m", etc.
+    // 4. Extract Time (e.g., "at 5 pm", "18:00", "8 p.m", "5:30am")
     final timeRegex = RegExp(
       r'(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)',
       caseSensitive: false,
     );
     final match = timeRegex.firstMatch(cleanText);
 
-    if (match != null && scheduledDate != null) {
-      // If we found a date, let's try to add the time
-      // If no date found yet, we might assume "Today" if time is in future, else "Tomorrow"?
-      // For MVP, let's require a date keyword OR default to Today if only time is given.
-
+    if (match != null) {
       final hourStr = match.group(1);
       final minuteStr = match.group(2) ?? '00';
       final meridiem = match.group(3)?.replaceAll('.', '').toLowerCase();
@@ -91,83 +163,41 @@ class DateTimeParser {
       if (meridiem == 'pm' && hour < 12) hour += 12;
       if (meridiem == 'am' && hour == 12) hour = 0;
 
-      scheduledDate = DateTime(
-        scheduledDate.year,
-        scheduledDate.month,
-        scheduledDate.day,
-        hour,
-        minute,
-      );
-
-      // Remove the time string from title
+      // Clean up text
       cleanText = cleanText.replaceAll(match.group(0)!, '').trim();
-    } else if (match != null && scheduledDate == null) {
-      // Only time provided, assume today
-      final hourStr = match.group(1);
-      final minuteStr = match.group(2) ?? '00';
-      final meridiem = match.group(3)?.replaceAll('.', '').toLowerCase();
 
-      int hour = int.parse(hourStr!);
-      int minute = int.parse(minuteStr);
-
-      final now = DateTime.now();
-
-      if (meridiem != null) {
-        // AM/PM specified
-        if (meridiem == 'pm' && hour < 12) hour += 12;
-        if (meridiem == 'am' && hour == 12) hour = 0;
-
+      if (scheduledDate != null) {
+        // combine date + time
+        scheduledDate = DateTime(
+          scheduledDate.year,
+          scheduledDate.month,
+          scheduledDate.day,
+          hour,
+          minute,
+        );
+      } else {
+        // Only time provided, assume today/tomorrow smart logic
+        final now = DateTime.now();
         var potentialDate =
             DateTime(now.year, now.month, now.day, hour, minute);
-        // If time passed, assume tomorrow
+
+        // If time passed today (e.g. it's 3pm, user says "at 2pm"), assume tomorrow
         if (potentialDate.isBefore(now)) {
           potentialDate = potentialDate.add(const Duration(days: 1));
         }
         scheduledDate = potentialDate;
-      } else {
-        // Ambiguous time (no AM/PM)
-        // Try to infer intent: prefer "Today future" over "Today past"
-
-        // Option 1: Treat as 24h if > 12 (already covered by parsing)
-        // If hour <= 12, it could be AM or PM.
-
-        if (hour <= 12) {
-          // Construct AM and PM candidates
-          final hourAM = (hour == 12) ? 0 : hour;
-          final hourPM = (hour == 12) ? 12 : hour + 12;
-
-          final dateAM = DateTime(now.year, now.month, now.day, hourAM, minute);
-          final datePM = DateTime(now.year, now.month, now.day, hourPM, minute);
-
-          if (dateAM.isAfter(now)) {
-            // AM is in future, assume AM (closest future time)
-            scheduledDate = dateAM;
-          } else if (datePM.isAfter(now)) {
-            // AM is past, but PM is future (e.g. now 10am, input 2:00 -> 2pm)
-            // OR now 11pm, input 11:30 -> 11:30pm
-            scheduledDate = datePM;
-          } else {
-            // Both passed today, assume AM tomorrow (standard behavior)
-            scheduledDate = dateAM.add(const Duration(days: 1));
-          }
-        } else {
-          // 24h format (e.g. 13:00)
-          var potentialDate =
-              DateTime(now.year, now.month, now.day, hour, minute);
-          if (potentialDate.isBefore(now)) {
-            potentialDate = potentialDate.add(const Duration(days: 1));
-          }
-          scheduledDate = potentialDate;
-        }
       }
-
-      cleanText = cleanText.replaceAll(match.group(0)!, '').trim();
     }
 
-    // Cleanup extra "at" or spaces
-    cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    // Remove "at" at the end if exists
+    // Cleanup extra "in" or "on"
+    // e.g. "Meeting in Malaysia in 15 March" -> "Meeting in Malaysia" (handled by regex remove)
+    // checking for dangling prepositions
+    if (cleanText.endsWith(' in')) {
+      cleanText = cleanText.substring(0, cleanText.length - 3).trim();
+    }
+    if (cleanText.endsWith(' on')) {
+      cleanText = cleanText.substring(0, cleanText.length - 3).trim();
+    }
     if (cleanText.endsWith(' at')) {
       cleanText = cleanText.substring(0, cleanText.length - 3).trim();
     }
