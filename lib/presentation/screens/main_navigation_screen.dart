@@ -59,7 +59,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         height: 65,
-        margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,

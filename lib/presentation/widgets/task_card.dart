@@ -24,6 +24,7 @@ class _TaskCardState extends ConsumerState<TaskCard>
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
   Timer? _overdueTimer;
+  bool _isDismissed = false;
 
   @override
   void initState() {
@@ -88,6 +89,10 @@ class _TaskCardState extends ConsumerState<TaskCard>
     final isOverdue = widget.task.scheduledDate.isBefore(DateTime.now()) &&
         !widget.task.isCompleted;
 
+    if (_isDismissed) {
+      return const SizedBox.shrink();
+    }
+
     return SlideTransition(
       position: _slideAnimation,
       child: ScaleTransition(
@@ -96,6 +101,9 @@ class _TaskCardState extends ConsumerState<TaskCard>
           key: Key(widget.task.id),
           direction: DismissDirection.endToStart,
           onDismissed: (_) {
+            setState(() {
+              _isDismissed = true;
+            });
             ref.read(deleteTaskProvider(widget.task.id));
           },
           background: Container(
@@ -300,24 +308,14 @@ class _TaskCardState extends ConsumerState<TaskCard>
                                             .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        widget.task.category.icon,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        widget.task.category.displayName,
-                                        style: TextStyle(
-                                          color: Color(
-                                              widget.task.category.colorValue),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    widget.task.category.displayName,
+                                    style: TextStyle(
+                                      color: Color(
+                                          widget.task.category.colorValue),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
