@@ -156,11 +156,24 @@ class StatsScreen extends ConsumerWidget {
                           fontSize: 18, fontWeight: FontWeight.bold)),
                   const Gap(16),
                   Container(
-                    height: 220,
-                    padding: const EdgeInsets.all(20),
+                    height: 240,
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.black.withValues(alpha: 0.05),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black
+                              .withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: BarChart(
                       BarChartData(
@@ -195,10 +208,13 @@ class StatsScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Text(
                                     weeklyData[value.toInt()]['day'] as String,
-                                    style: const TextStyle(
-                                      color: Colors.grey,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.5),
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 );
@@ -216,6 +232,8 @@ class StatsScreen extends ConsumerWidget {
                         borderData: FlBorderData(show: false),
                         barGroups: weeklyData.asMap().entries.map((e) {
                           final count = e.value['count'] as int;
+                          final barWidth =
+                              (constraints.maxWidth / 20).clamp(12.0, 20.0);
                           return BarChartGroupData(
                             x: e.key,
                             barRods: [
@@ -223,11 +241,22 @@ class StatsScreen extends ConsumerWidget {
                                 toY: count.toDouble(),
                                 color: count > 0
                                     ? AppTheme.primaryIndigo
-                                    : Colors.grey.shade300,
-                                width: 16,
-                                borderRadius: BorderRadius.circular(4),
+                                    : (isDark
+                                        ? Colors.white10
+                                        : Colors.grey.shade200),
+                                width: barWidth,
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(6)),
                                 backDrawRodData: BackgroundBarChartRodData(
-                                  show: false,
+                                  show: true,
+                                  toY: (weeklyData
+                                              .map((e) => e['count'] as int)
+                                              .reduce((a, b) => a > b ? a : b) +
+                                          2)
+                                      .toDouble(),
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.02)
+                                      : Colors.black.withValues(alpha: 0.01),
                                 ),
                               ),
                             ],
@@ -382,66 +411,88 @@ class StatsScreen extends ConsumerWidget {
 
   Widget _buildCategoryCard(BuildContext context, TaskCategory category,
       int count, double percentage) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Color(category.colorValue).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              category.icon,
-              style: const TextStyle(fontSize: 20),
-            ),
-          ),
-          const Gap(16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      category.displayName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      "$count tasks",
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                const Gap(8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: percentage,
-                    minHeight: 6,
-                    backgroundColor:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey[800]
-                            : Colors.grey.shade100,
-                    color: Color(category.colorValue),
-                  ),
-                ),
-              ],
-            ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.05),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Color(category.colorValue).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                category.icon,
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+            const Gap(16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        category.displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "$count tasks",
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.5),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Gap(10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: percentage,
+                      minHeight: 8,
+                      backgroundColor: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.05),
+                      color: Color(category.colorValue),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -497,12 +548,14 @@ class StatsScreen extends ConsumerWidget {
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.2),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.05),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
