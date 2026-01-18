@@ -6,6 +6,7 @@ import 'package:say_task/presentation/providers/task_provider.dart';
 import 'package:say_task/domain/entities/task_category.dart';
 import 'package:intl/intl.dart';
 import 'package:gap/gap.dart';
+import 'package:say_task/presentation/widgets/empty_state_widget.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -27,22 +28,10 @@ class StatsScreen extends ConsumerWidget {
       body: tasksAsync.when(
         data: (tasks) {
           if (tasks.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.analytics_outlined,
-                      size: 64, color: Colors.grey[400]),
-                  const Gap(16),
-                  Text(
-                    'No tasks yet. Start working!',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
+            return const EmptyStateWidget(
+              message: "No stats available",
+              subMessage: "Complete tasks to see your progress",
+              icon: Icons.analytics_outlined,
             );
           }
 

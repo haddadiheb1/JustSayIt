@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/presentation/screens/note_editor_screen.dart';
 import 'package:say_task/presentation/providers/note_provider.dart';
 import 'package:say_task/presentation/widgets/note_card.dart';
 import 'package:say_task/data/models/note_model.dart';
+import 'package:say_task/presentation/widgets/empty_state_widget.dart';
 
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({super.key});
@@ -32,37 +32,10 @@ class _NotesScreenState extends ConsumerState<NotesScreen>
           notesAsync.when(
             data: (notes) {
               if (notes.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.note_outlined,
-                        size: 80,
-                        color: AppTheme.textSecondary,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'No notes yet',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Capture ideas fast',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                  ),
+                return const EmptyStateWidget(
+                  message: 'No notes yet',
+                  subMessage: 'Capture ideas fast',
+                  icon: Icons.note_outlined,
                 );
               }
 

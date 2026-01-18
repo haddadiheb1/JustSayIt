@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:say_task/core/theme/app_theme.dart';
@@ -8,6 +7,7 @@ import 'package:say_task/domain/entities/task.dart';
 import 'package:say_task/presentation/providers/task_provider.dart';
 import 'package:say_task/presentation/widgets/task_card.dart';
 import 'package:say_task/presentation/screens/manual_task_entry_screen.dart';
+import 'package:say_task/presentation/widgets/empty_state_widget.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -69,19 +69,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       body: tasksAsync.when(
         data: (tasks) {
           if (tasks.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.task_alt, size: 64, color: Colors.grey[300]),
-                  const Gap(16),
-                  Text(
-                    "No tasks yet.\nTap the mic to add one.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 16),
-                  ),
-                ],
-              ),
+            return const EmptyStateWidget(
+              message: "No tasks yet",
+              subMessage: "Tap the mic to add one.",
+              icon: Icons.task_alt,
             );
           }
 
