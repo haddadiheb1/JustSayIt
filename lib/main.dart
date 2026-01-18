@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/presentation/screens/main_navigation_screen.dart';
 import 'package:say_task/presentation/screens/onboarding_screen.dart';
+import 'package:say_task/presentation/screens/splash_screen.dart';
 import 'package:say_task/presentation/providers/settings_provider.dart';
 import 'package:say_task/data/models/task_model.dart';
 import 'package:say_task/data/models/note_model.dart';
@@ -67,9 +68,11 @@ class VoiceTaskApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      home: showOnboarding
-          ? const OnboardingScreen()
-          : const MainNavigationScreen(),
+      home: SplashScreen(
+        nextScreen: showOnboarding
+            ? const OnboardingScreen()
+            : const MainNavigationScreen(),
+      ),
     );
   }
 }
