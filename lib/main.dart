@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:say_task/core/theme/app_theme.dart';
 import 'package:say_task/presentation/screens/main_navigation_screen.dart';
+import 'package:say_task/presentation/screens/onboarding_screen.dart';
 import 'package:say_task/presentation/providers/settings_provider.dart';
 import 'package:say_task/data/models/task_model.dart';
 import 'package:say_task/data/models/note_model.dart';
@@ -26,6 +27,7 @@ void main() async {
   // Open boxes
   await Hive.openBox<TaskModel>('tasks');
   await Hive.openBox<NoteModel>('notes');
+  final settingsBox = await Hive.openBox('settings');
 
   // Initialize Background Service (Alarms)
   await BackgroundService.init();
@@ -35,16 +37,25 @@ void main() async {
   final notificationService = container.read(notificationServiceProvider);
   await notificationService.init();
 
+  // Check onboarding status
+  final onboardingComplete =
+      settingsBox.get('onboarding_complete', defaultValue: false);
+
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: const VoiceTaskApp(),
+      child: VoiceTaskApp(showOnboarding: !onboardingComplete),
     ),
   );
 }
 
 class VoiceTaskApp extends ConsumerWidget {
-  const VoiceTaskApp({super.key});
+  final bool showOnboarding;
+
+  const VoiceTaskApp({
+    super.key,
+    required this.showOnboarding,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +67,9 @@ class VoiceTaskApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      home: const MainNavigationScreen(),
+      home: showOnboarding
+          ? const OnboardingScreen()
+          : const MainNavigationScreen(),
     );
   }
 }
