@@ -194,17 +194,31 @@ class CozyBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+
+    // Responsive dimensions based on screen width
+    final barHeight = 80.0;
+    final micButtonSize =
+        screenWidth * 0.16; // 16% of screen width, min 56, max 72
+    final micIconSize = micButtonSize * 0.5; // 50% of button size
+    final centerGap = micButtonSize * 0.9; // Gap scales with button size
+    final micButtonTopOffset =
+        (barHeight - micButtonSize) / 2; // Center vertically
 
     return Container(
-      width: size.width,
-      height: 80,
-      margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+      width: screenWidth,
+      height: barHeight,
+      margin: EdgeInsets.only(
+        bottom: 24,
+        left: screenWidth * 0.04, // 4% of screen width
+        right: screenWidth * 0.04,
+      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
           // Background Shape
           CustomPaint(
-            size: Size(size.width, 80),
+            size: Size(screenWidth, barHeight),
             painter: CozyBarPainter(
               color: Theme.of(context).colorScheme.surface,
               shadowColor: Colors.black.withValues(alpha: 0.1),
@@ -217,7 +231,7 @@ class CozyBottomBar extends StatelessWidget {
             children: [
               _buildNavItem(context, 0, Icons.home_rounded, "Home"),
               _buildNavItem(context, 1, Icons.analytics_rounded, "Stats"),
-              const Gap(60), // Space for the center bump
+              SizedBox(width: centerGap), // Responsive gap for the center bump
               _buildNavItem(context, 3, Icons.sticky_note_2_rounded,
                   "Notes"), // index 3 in navbar -> 2 in pages
               _buildNavItem(context, 4, Icons.settings_rounded,
@@ -225,36 +239,41 @@ class CozyBottomBar extends StatelessWidget {
             ],
           ),
 
-          // Center Mic Button
+          // Center Mic Button - Responsive with tap feedback
           Positioned(
-            top: 0,
-            child: GestureDetector(
-              onTap: onVoiceTap,
-              child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primaryIndigo,
-                      const Color(0xFF818CF8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primaryIndigo.withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 8),
+            top: micButtonTopOffset.clamp(0.0, 8.0), // Clamp between 0 and 8
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onVoiceTap,
+                borderRadius: BorderRadius.circular(micButtonSize / 2),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: micButtonSize.clamp(56.0, 72.0),
+                  height: micButtonSize.clamp(56.0, 72.0),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppTheme.primaryIndigo,
+                        Color(0xFF818CF8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.mic_rounded,
-                  color: Colors.white,
-                  size: 32,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryIndigo.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.mic_rounded,
+                    color: Colors.white,
+                    size: micIconSize.clamp(24.0, 36.0),
+                  ),
                 ),
               ),
             ),
@@ -275,29 +294,37 @@ class CozyBottomBar extends StatelessWidget {
         ? AppTheme.primaryIndigo
         : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4);
 
+    // Responsive icon size based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    final iconSize =
+        (screenWidth * 0.065).clamp(22.0, 28.0); // Responsive icon size
+
     return Expanded(
-      child: GestureDetector(
-        onTap: () => onTap(index),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min, // Constrain height
-          children: [
-            // Raise icons slightly to center them vertically in the bar
-            // The bump starts higher, but the bar body is lower
-            const Gap(12),
-            Icon(icon, color: color, size: 26),
-            if (isSelected)
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryIndigo,
-                  shape: BoxShape.circle,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => onTap(index),
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min, // Constrain height
+            children: [
+              // Raise icons slightly to center them vertically in the bar
+              // The bump starts higher, but the bar body is lower
+              const Gap(12),
+              Icon(icon, color: color, size: iconSize),
+              if (isSelected)
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryIndigo,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

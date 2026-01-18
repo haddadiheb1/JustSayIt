@@ -256,7 +256,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         title: const Text('Privacy Policy'),
         trailing: const Icon(Icons.open_in_new, size: 20),
         onTap: () {
-          // TODO: Open privacy policy URL
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text('Privacy policy link will be added soon')),
