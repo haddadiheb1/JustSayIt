@@ -60,17 +60,25 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     int pageIndex = index;
     if (index > 2) pageIndex = index - 1;
 
-    setState(() {
-      _currentIndex = pageIndex;
-    });
-    _pageController.jumpToPage(pageIndex);
+    // Prevent unnecessary navigation if already on the page
+    if (_currentIndex == pageIndex) return;
+
+    // Animate smoothly to the page - state will be updated by onPageChanged
+    _pageController.animateToPage(
+      pageIndex,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _startListening() async {
     // Switch to Home screen if not already there
     if (_currentIndex != 0) {
-      setState(() => _currentIndex = 0);
-      _pageController.jumpToPage(0);
+      _pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
 
     final speechService = ref.read(speechServiceProvider);
@@ -167,7 +175,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         physics: const NeverScrollableScrollPhysics(),
         children: _screens,
         onPageChanged: (index) {
-          setState(() => _currentIndex = index);
+          setState(() {
+            _currentIndex = index;
+          });
         },
       ),
       bottomNavigationBar: CozyBottomBar(
@@ -196,84 +206,91 @@ class CozyBottomBar extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final screenWidth = size.width;
 
-    // Responsive dimensions based on screen width
-    final barHeight = 80.0;
-    final micButtonSize =
-        screenWidth * 0.16; // 16% of screen width, min 56, max 72
-    final micIconSize = micButtonSize * 0.5; // 50% of button size
-    final centerGap = micButtonSize * 0.9; // Gap scales with button size
-    final micButtonTopOffset =
-        (barHeight - micButtonSize) / 2; // Center vertically
+    // Responsive dimensions
+    final barHeight = 85.0;
+    final navIconSize = (screenWidth * 0.065).clamp(24.0, 30.0);
+    final micButtonSize = (screenWidth * 0.15).clamp(54.0, 68.0);
+    final micIconSize = navIconSize * 1.0;
+    final centerGap = micButtonSize * 0.8;
+
+    // Bottom padding for safe area logic
+    final bottomMargin = MediaQuery.of(context).padding.bottom > 0
+        ? MediaQuery.of(context).padding.bottom + 8
+        : 20.0;
 
     return Container(
       width: screenWidth,
       height: barHeight,
       margin: EdgeInsets.only(
-        bottom: 24,
-        left: screenWidth * 0.04, // 4% of screen width
-        right: screenWidth * 0.04,
+        bottom: bottomMargin,
+        left: 16,
+        right: 16,
       ),
       child: Stack(
+        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          // Background Shape
-          CustomPaint(
-            size: Size(screenWidth, barHeight),
-            painter: CozyBarPainter(
-              color: Theme.of(context).colorScheme.surface,
-              shadowColor: Colors.black.withValues(alpha: 0.1),
+          // Background Shape with Shadow
+          Positioned.fill(
+            child: CustomPaint(
+              painter: CozyBarPainter(
+                color: Theme.of(context).colorScheme.surface,
+                shadowColor: Colors.black.withValues(alpha: 0.15),
+              ),
             ),
           ),
 
           // Navigation Items
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(context, 0, Icons.home_rounded, "Home"),
-              _buildNavItem(context, 1, Icons.analytics_rounded, "Stats"),
-              SizedBox(width: centerGap), // Responsive gap for the center bump
-              _buildNavItem(context, 3, Icons.sticky_note_2_rounded,
-                  "Notes"), // index 3 in navbar -> 2 in pages
-              _buildNavItem(context, 4, Icons.settings_rounded,
-                  "Settings"), // index 4 in navbar -> 3 in pages
-            ],
+          Padding(
+            padding: const EdgeInsets.only(top: 20), // Align with bar body
+            child: Row(
+              children: [
+                _buildNavItem(
+                    context, 0, Icons.grid_view_rounded, "Home", navIconSize),
+                _buildNavItem(
+                    context, 1, Icons.bar_chart_rounded, "Stats", navIconSize),
+                SizedBox(width: centerGap),
+                _buildNavItem(
+                    context, 3, Icons.note_alt_rounded, "Notes", navIconSize),
+                _buildNavItem(context, 4, Icons.settings_rounded, "Settings",
+                    navIconSize),
+              ],
+            ),
           ),
 
-          // Center Mic Button - Responsive with tap feedback
+          // Center Mic Button
           Positioned(
-            top: micButtonTopOffset.clamp(0.0, 8.0), // Clamp between 0 and 8
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onVoiceTap,
-                borderRadius: BorderRadius.circular(micButtonSize / 2),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: micButtonSize.clamp(56.0, 72.0),
-                  height: micButtonSize.clamp(56.0, 72.0),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppTheme.primaryIndigo,
-                        Color(0xFF818CF8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryIndigo.withValues(alpha: 0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 8),
-                      ),
+            top:
+                6, // Inset from the bump peak (0) to create "white space" above
+            child: GestureDetector(
+              onTap: onVoiceTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: micButtonSize,
+                height: micButtonSize,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      AppTheme.primaryIndigo,
+                      Color(0xFF818CF8),
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: Icon(
-                    Icons.mic_rounded,
-                    color: Colors.white,
-                    size: micIconSize.clamp(24.0, 36.0),
-                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryIndigo.withValues(alpha: 0.4),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.mic_rounded,
+                  color: Colors.white,
+                  size: micIconSize,
                 ),
               ),
             ),
@@ -283,46 +300,44 @@ class CozyBottomBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(
-      BuildContext context, int index, IconData icon, String label) {
-    // Map navbar index to page index for comparison
+  Widget _buildNavItem(BuildContext context, int index, IconData icon,
+      String label, double iconSize) {
     int pageIndex = index;
     if (index > 2) pageIndex = index - 1;
 
     final isSelected = currentIndex == pageIndex;
     final color = isSelected
         ? AppTheme.primaryIndigo
-        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4);
-
-    // Responsive icon size based on screen width
-    final screenWidth = MediaQuery.of(context).size.width;
-    final iconSize =
-        (screenWidth * 0.065).clamp(22.0, 28.0); // Responsive icon size
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3);
 
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onTap(index),
-          borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => onTap(index),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 200),
+          scale: isSelected ? 1.1 : 1.0,
+          curve: Curves.easeOutBack,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min, // Constrain height
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Raise icons slightly to center them vertically in the bar
-              // The bump starts higher, but the bar body is lower
-              const Gap(12),
-              Icon(icon, color: color, size: iconSize),
-              if (isSelected)
-                Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  width: 4,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryIndigo,
-                    shape: BoxShape.circle,
-                  ),
+              Icon(
+                icon,
+                color: color,
+                size: iconSize,
+              ),
+              const Gap(4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: isSelected ? 4 : 0,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryIndigo,
+                  shape: BoxShape.circle,
                 ),
+              ),
             ],
           ),
         ),
@@ -345,65 +360,59 @@ class CozyBarPainter extends CustomPainter {
 
     final shadowPaint = Paint()
       ..color = shadowColor
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final path = Path();
 
-    // Constants for the curve
     const double cornerRadius = 24.0;
-    const double bumpRadius = 38.0; // Radius of the hole/bump
-    const double top = 20.0; // Top Y of the main bar (excluding bump)
+    const double top = 20.0;
     final double center = size.width / 2;
 
-    // Start top-left
-    path.moveTo(0 + cornerRadius, top);
+    // Bump parameters - more organic
+    const double bumpWidth = 45.0; // Width of the curve base
 
-    // Top line to bump start
-    path.lineTo(center - bumpRadius - 10, top);
+    path.moveTo(0, top + cornerRadius);
 
-    // The convex bump
+    // Top left corner
+    path.quadraticBezierTo(0, top, cornerRadius, top);
+
+    // Line to bump start
+    path.lineTo(center - bumpWidth - 15, top);
+
+    // Smoother organic transition to the bump
     path.cubicTo(
-      center - bumpRadius, top, // control point 1
-      center - bumpRadius, 0, // control point 2 (upwards)
-      center, 0, // end point (top center)
-    );
-    path.cubicTo(
-      center + bumpRadius, 0, // control point 1
-      center + bumpRadius, top, // control point 2
-      center + bumpRadius + 10, top, // end point
+      center - bumpWidth + 5,
+      top,
+      center - bumpWidth + 5,
+      0,
+      center,
+      0,
     );
 
-    // Top line to right corner
+    path.cubicTo(
+      center + bumpWidth - 5,
+      0,
+      center + bumpWidth - 5,
+      top,
+      center + bumpWidth + 15,
+      top,
+    );
+
+    // Top right corner
     path.lineTo(size.width - cornerRadius, top);
-
-    // Top-right corner
     path.quadraticBezierTo(size.width, top, size.width, top + cornerRadius);
 
-    // Right side
+    // Right side and bottom
     path.lineTo(size.width, size.height - cornerRadius);
-
-    // Bottom-right corner
     path.quadraticBezierTo(
         size.width, size.height, size.width - cornerRadius, size.height);
-
-    // Bottom side
     path.lineTo(cornerRadius, size.height);
-
-    // Bottom-left corner
     path.quadraticBezierTo(0, size.height, 0, size.height - cornerRadius);
-
-    // Left side
-    path.lineTo(0, top + cornerRadius);
-
-    // Top-left corner
-    path.quadraticBezierTo(0, top, cornerRadius, top);
 
     path.close();
 
-    // Draw shadow
-    canvas.drawPath(path.shift(const Offset(0, 5)), shadowPaint);
-
-    // Draw shape
+    // Draw shadow first
+    canvas.drawPath(path.shift(const Offset(0, 4)), shadowPaint);
     canvas.drawPath(path, paint);
   }
 
